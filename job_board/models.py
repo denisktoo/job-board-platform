@@ -24,6 +24,7 @@ class User(AbstractUser):
     
 class Company(models.Model):
     company_id = models.AutoField(primary_key=True)
+    user = models.ForeignKey('User', on_delete=models.CASCADE, db_index=True, related_name="companies")
     name = models.CharField(max_length=255, null=False, db_index=True)
     email = models.EmailField(unique=True, null=False, db_index=True)
     phone_number = models.CharField(max_length=20, blank=True, null=True)
@@ -47,8 +48,8 @@ class Job(models.Model):
     job_id = models.AutoField(primary_key=True)
     title = models.CharField(max_length=255, null=False, db_index=True)
     description = models.TextField(blank=True, null=True)
-    company = models.ForeignKey('Company', on_delete=models.CASCADE, db_index=True)
-    category = models.ForeignKey('Category', on_delete=models.SET_NULL, null=True, db_index=True)
+    company = models.ForeignKey('Company', on_delete=models.CASCADE, db_index=True, related_name="jobs")
+    category = models.ForeignKey('Category', on_delete=models.SET_NULL, null=True, db_index=True, related_name="jobs")
     salary = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True, db_index=True)
     created_at = models.DateTimeField(auto_now_add=True, db_index=True)
     deadline = models.DateTimeField(db_index=True)
@@ -66,8 +67,8 @@ class Job(models.Model):
 
 class Application(models.Model):
     application_id = models.AutoField(primary_key=True)
-    user = models.ForeignKey('User', on_delete=models.CASCADE, db_index=True)
-    job = models.ForeignKey('Job', on_delete=models.CASCADE, db_index=True)
+    user = models.ForeignKey('User', on_delete=models.CASCADE, db_index=True, related_name="applications")
+    job = models.ForeignKey('Job', on_delete=models.CASCADE, db_index=True, related_name="applications")
     applied_at = models.DateTimeField(auto_now_add=True, db_index=True)
 
     STATUS_CHOICES = [

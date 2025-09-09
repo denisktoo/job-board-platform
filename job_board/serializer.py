@@ -4,27 +4,34 @@ from rest_framework import serializers
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = '__all__'
+        fields = ['user_id', 'username', 'first_name', 'last_name', 'email', 'password', 'phone_number', 'role', 'created_at']
 
 class CompanySerializer(serializers.ModelSerializer):
+    user = UserSerializer(read_only=True)
     class Meta:
         model = Company
-        fields = '__all__'
+        fields = ['company_id', 'user', 'name', 'email', 'phone_number', 'description', 'location', 'website', 'industry']
 
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
-        fields = '__all__'
+        fields = ['category_id', 'name', 'description']
 
 class JobSerializer(serializers.ModelSerializer):
+    company = CompanySerializer(read_only=True)
+    category = CategorySerializer(read_only=True)
+
     class Meta:
         model = Job
-        fields = '__all__'
+        fields = ['job_id', 'title', 'description', 'company', 'category', 'salary', 'created_at', 'deadline', 'employment_types']
 
 class ApplicationSerializer(serializers.ModelSerializer):
+    job = JobSerializer(read_only=True)
+    user = UserSerializer(read_only=True)
+
     class Meta:
         model = Application
-        fields = '__all__'
+        fields = ['application_id', 'user', 'job', 'applied_at']
 
 class RegisterSerializer(serializers.ModelSerializer):
     class Meta:
