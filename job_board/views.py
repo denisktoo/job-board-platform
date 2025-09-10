@@ -7,12 +7,37 @@ from rest_framework import viewsets, generics
 from .models import User, Company, Category, Job, Application
 from rest_framework.permissions import AllowAny
 from .permissions import IsAdminUser, IsApplicantOrAdminUser, IsRecruiterOrAdminUser
-from rest_framework.exceptions import MethodNotAllowed
+from rest_framework.exceptions import MethodNotAllowed, ValidationError, PermissionDenied
 
 class UserViewSets(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = [IsAdminUser]
+
+    # def get_permissions(self):
+    #     """
+    #     - Admin: full access to everything
+    #     - User: can view and update only their own profile
+    #     """
+    #     if self.action in ["destroy", "list"]:  
+    #         # Only admins can delete users or list all users
+    #         return [IsAdminUser()]
+
+    #     return [IsAdminUser()]
+
+    # def check_object_permissions(self, request, obj):
+    #     """
+    #     Ensure users can only CRUD their own accounts, unless they are admin.
+    #     """
+    #     role = getattr(request.user, "role", None)
+
+    #     if role == "admin":
+    #         # Admin can do anything
+    #         return True
+
+    #     # Normal user: can only access their own account
+    #     if obj != request.user:
+    #         raise PermissionDenied("You do not have permission to access this user.")
 
 class CompanyViewSets(viewsets.ModelViewSet):
     queryset = Company.objects.all()
@@ -27,16 +52,27 @@ class CategoryViewSets(viewsets.ModelViewSet):
     serializer_class = CategorySerializer
     permission_classes = [IsAdminUser]
 
+class PublicJobViewSet(viewsets.ReadOnlyModelViewSet):
+    serializer_class = JobSerializer
+    queryset = Job.objects.all()
+
 class JobViewSets(viewsets.ModelViewSet):
     serializer_class = JobSerializer
     permission_classes = [IsRecruiterOrAdminUser]
 
     def get_queryset(self):
         company_pk = self.kwargs.get('company_pk')
-        return Job.objects.filter(company_id=company_pk)
+        if company_pk:
+            # Nested route: /companies/{company_pk}/jobs/
+            return Job.objects.filter(company_id=company_pk)
+
+        # Flat route: /jobs/
+        return Job.objects.all()
     
     def perform_create(self, serializer):
         company_pk = self.kwargs.get('company_pk')
+        if not company_pk:
+            raise ValidationError("Jobs must be created under a company.")
         return serializer.save(company_id=company_pk)
 
 class JobApplicationViewSets(viewsets.ModelViewSet):
