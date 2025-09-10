@@ -13,7 +13,7 @@ class User(AbstractUser):
 
     ROLE_CHOICES = [
         ('user', 'User'),
-        ('Recruiter', 'Recruiter'),
+        ('recruiter', 'Recruiter'),
         ('admin', 'Admin'),
     ]
     role = models.CharField(max_length=10, choices=ROLE_CHOICES, null=False, db_index=True)
