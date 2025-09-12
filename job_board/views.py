@@ -13,7 +13,8 @@ from rest_framework.exceptions import (
     MethodNotAllowed, ValidationError, NotFound, PermissionDenied
 )
 from .tasks import (
-    send_company_registration_confirmation_email
+    send_company_registration_confirmation_email, send_job_application_confirmation_email
+    , send_job_registration_confirmation_email
 )
 
 class UserViewSets(viewsets.ModelViewSet):
@@ -88,9 +89,27 @@ class JobViewSets(viewsets.ModelViewSet):
     
     def perform_create(self, serializer):
         company_pk = self.kwargs.get('company_pk')
+
         if not company_pk:
             raise ValidationError("Jobs must be created under a company.")
-        return serializer.save(company_id=company_pk)
+
+        job = serializer.save(company_id=company_pk)
+
+        # Call Celery task after saving
+        send_job_registration_confirmation_email.delay(
+            job.company.user.email,
+            job.company.name,
+            job.title,
+            job.category.name,
+            job.description,
+            job.location,
+            job.employment_type,
+            job.salary,
+            job.created_at,
+            job.deadline
+        )
+
+        return job
 
 class JobApplicationViewSets(viewsets.ModelViewSet):
     serializer_class = ApplicationSerializer
@@ -102,7 +121,19 @@ class JobApplicationViewSets(viewsets.ModelViewSet):
     
     def perform_create(self, serializer):
         job_pk = self.kwargs.get('job_pk')
-        return serializer.save(user=self.request.user, job_id=job_pk)
+        application =  serializer.save(user=self.request.user, job_id=job_pk)
+
+        # Call Celery task after saving
+        send_job_application_confirmation_email.delay(
+            application.user.email,
+            application.user.username,
+            application.job.title,
+            application.job.company.name,
+            application.status,
+            application.applied_at
+        )
+
+        return application
 
 class CompanyJobApplicationsViewSet(viewsets.ModelViewSet):
     serializer_class = ApplicationSerializer

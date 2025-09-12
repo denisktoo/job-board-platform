@@ -19,11 +19,11 @@ class CategorySerializer(serializers.ModelSerializer):
 
 class JobSerializer(serializers.ModelSerializer):
     company = CompanySerializer(read_only=True)
-    category = CategorySerializer(read_only=True)
+    category = serializers.PrimaryKeyRelatedField(queryset=Category.objects.all())
 
     class Meta:
         model = Job
-        fields = ['job_id', 'title', 'description', 'company', 'category', 'location', 'salary', 'created_at', 'deadline', 'employment_types']
+        fields = ['job_id', 'title', 'description', 'company', 'category', 'location', 'salary', 'created_at', 'deadline', 'employment_type']
 
 class ApplicationSerializer(serializers.ModelSerializer):
     job = JobSerializer(read_only=True)

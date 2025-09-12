@@ -55,13 +55,13 @@ class Job(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, db_index=True)
     deadline = models.DateTimeField(db_index=True)
 
-    EMPLOYMENT_TYPES = [
+    EMPLOYMENT_CHOICES = [
         ('full_time', 'Full Time'),
         ('part_time', 'Part Time'),
         ('internship', 'Internship'),
         ('contract', 'Contract'),
     ]
-    employment_types = models.CharField(max_length=30, choices=EMPLOYMENT_TYPES, null=False, db_index=True)
+    employment_type = models.CharField(max_length=30, choices=EMPLOYMENT_CHOICES, null=False, db_index=True)
 
     def save(self, *args, **kwargs):
         # Set location to company's location if not specified
