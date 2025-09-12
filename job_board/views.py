@@ -12,6 +12,9 @@ from .permissions import (
 from rest_framework.exceptions import (
     MethodNotAllowed, ValidationError, NotFound, PermissionDenied
 )
+from .tasks import (
+    send_company_registration_confirmation_email
+)
 
 class UserViewSets(viewsets.ModelViewSet):
     queryset = User.objects.all()
@@ -49,7 +52,17 @@ class CompanyViewSets(viewsets.ModelViewSet):
     permission_classes = [IsRecruiterOrAdminUser]
 
     def perform_create(self, serializer):
-        return serializer.save(user=self.request.user)
+        company = serializer.save(user=self.request.user)
+
+        # Call Celery task after saving
+        send_company_registration_confirmation_email.delay(
+            company.email,
+            company.name,
+            company.location,
+            company.industry
+        )
+
+        return company
 
 class CategoryViewSets(viewsets.ModelViewSet):
     queryset = Category.objects.all()
@@ -57,8 +70,8 @@ class CategoryViewSets(viewsets.ModelViewSet):
     permission_classes = [IsAdminUser]
 
 class PublicJobViewSet(viewsets.ReadOnlyModelViewSet):
-    serializer_class = JobSerializer
     queryset = Job.objects.all()
+    serializer_class = JobSerializer
 
 class JobViewSets(viewsets.ModelViewSet):
     serializer_class = JobSerializer
