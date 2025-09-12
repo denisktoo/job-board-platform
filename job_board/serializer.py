@@ -31,7 +31,7 @@ class ApplicationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Application
-        fields = ['application_id', 'user', 'job', 'applied_at']
+        fields = ['application_id', 'user', 'job', 'status', 'applied_at']
 
 class RegisterSerializer(serializers.ModelSerializer):
     class Meta:
