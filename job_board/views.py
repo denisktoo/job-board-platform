@@ -109,7 +109,7 @@ class CompanyJobApplicationsViewSet(viewsets.ModelViewSet):
         try:
             job = Job.objects.get(job_id=job_pk, company=company)
         except Job.DoesNotExist:
-            raise NotFound("Job does not exist under this company.")
+            raise NotFound(f"This job does not exist under {company.name} company.")
 
         # Restrict recruiter to only their own company
         role = getattr(self.request.user, 'role', None)
