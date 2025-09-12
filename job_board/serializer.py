@@ -23,7 +23,7 @@ class JobSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Job
-        fields = ['job_id', 'title', 'description', 'company', 'category', 'salary', 'created_at', 'deadline', 'employment_types']
+        fields = ['job_id', 'title', 'description', 'company', 'category', 'location', 'salary', 'created_at', 'deadline', 'employment_types']
 
 class ApplicationSerializer(serializers.ModelSerializer):
     job = JobSerializer(read_only=True)

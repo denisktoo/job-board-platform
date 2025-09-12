@@ -6,8 +6,12 @@ from .serializer import (
 from rest_framework import viewsets, generics
 from .models import User, Company, Category, Job, Application
 from rest_framework.permissions import AllowAny
-from .permissions import IsAdminUser, IsApplicantOrAdminUser, IsRecruiterOrAdminUser, IsApplicantOrAdmin
-from rest_framework.exceptions import MethodNotAllowed, ValidationError, NotFound, PermissionDenied
+from .permissions import (
+    IsAdminUser, IsApplicantOrAdminUser, IsRecruiterOrAdminUser, IsApplicantOrAdmin
+)
+from rest_framework.exceptions import (
+    MethodNotAllowed, ValidationError, NotFound, PermissionDenied
+)
 
 class UserViewSets(viewsets.ModelViewSet):
     queryset = User.objects.all()

@@ -1,6 +1,5 @@
 from rest_framework import permissions
 from .models import Company, Job, Application
-from rest_framework.exceptions import PermissionDenied
 
 class IsAdminUser(permissions.BasePermission):
     """
