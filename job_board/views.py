@@ -24,6 +24,10 @@ class UserViewSets(viewsets.ModelViewSet):
     permission_classes = [IsApplicantOrAdmin]
 
     def get_queryset(self):
+        # Skip logic during Swagger schema generation
+        if getattr(self, "swagger_fake_view", False):
+            return User.objects.none()
+
         role = getattr(self.request.user, 'role', None)
         if role == 'admin':
             return User.objects.all()
@@ -138,6 +142,10 @@ class CompanyJobApplicationsViewSet(viewsets.ModelViewSet):
     permission_classes = [IsRecruiterOrAdminUser]
 
     def get_queryset(self):
+        # Skip logic during Swagger schema generation
+        if getattr(self, "swagger_fake_view", False):
+            return Company.objects.none()
+
         company_pk = self.kwargs.get('company_pk')
         job_pk = self.kwargs.get('job_pk')
 
