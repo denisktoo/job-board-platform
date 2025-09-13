@@ -23,8 +23,8 @@ FILE_UPLOAD_MAX_MEMORY_SIZE = 5242880  # 5MB
 DATA_UPLOAD_MAX_MEMORY_SIZE = 5242880  # 5MB
 
 # Media files
-MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA_URL = '/media_files/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media_files')
 
 DATA_UPLOAD_MAX_NUMBER_FIELDS = None
 
