@@ -16,6 +16,7 @@ from .tasks import (
     send_company_registration_confirmation_email, send_job_application_confirmation_email
     , send_job_registration_confirmation_email
 )
+from rest_framework.parsers import MultiPartParser, FormParser
 
 class UserViewSets(viewsets.ModelViewSet):
     queryset = User.objects.all()
@@ -110,6 +111,7 @@ class JobViewSets(viewsets.ModelViewSet):
 class JobApplicationViewSets(viewsets.ModelViewSet):
     serializer_class = ApplicationSerializer
     permission_classes = [IsApplicantOrAdminUser]
+    parser_classes = (MultiPartParser, FormParser)
 
     def get_queryset(self):
         job_pk = self.kwargs.get('job_pk')

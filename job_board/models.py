@@ -77,6 +77,8 @@ class Application(models.Model):
     user = models.ForeignKey('User', on_delete=models.CASCADE, db_index=True, related_name="applications")
     job = models.ForeignKey('Job', on_delete=models.CASCADE, db_index=True, related_name="applications")
     applied_at = models.DateTimeField(auto_now_add=True, db_index=True)
+    cover_letter = models.FileField(upload_to='cover_letter/', null=True, blank=True)
+    resume = models.FileField(upload_to='resume/', null=True, blank=True)
 
     STATUS_CHOICES = [
         ('pending', 'Pending'),
