@@ -98,13 +98,9 @@ class JobViewSets(viewsets.ModelViewSet):
         # Call Celery task after saving
         send_job_registration_confirmation_email.delay(
             job.company.user.email,
-            job.company.name,
+            job.company.user.first_name,
             job.title,
-            job.category.name,
-            job.description,
-            job.location,
             job.employment_type,
-            job.salary,
             job.created_at,
             job.deadline
         )

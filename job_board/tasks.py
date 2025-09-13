@@ -12,8 +12,8 @@ def send_company_registration_confirmation_email(email, name, location, industry
         f"Hello {name},\n\n"
         f"Your company has been successfully registered.\n\n"
         f"Details:\n"
-        f"📍 Location: {location}\n"
-        f"🏢 Industry: {industry}\n\n"
+        f"Location: {location}\n"
+        f"Industry: {industry}\n\n"
         f"Thank you for joining us!\n\n"
         f"Best regards,\n"
         f"The Job Board Team"
@@ -23,30 +23,21 @@ def send_company_registration_confirmation_email(email, name, location, industry
     return f"Company Registration email sent to {email}"
 
 @shared_task
-def send_job_registration_confirmation_email(email, name, title, category, description, 
-                                             location, type, salary, created_at, deadline):
+def send_job_registration_confirmation_email(email, name, title, type, created_at, deadline):
     """
     Send job registration email asynchronously.
     """
-    subject = f"Creation of {title} Job was successful!"
+    subject = f"{title} Job Registration was successful!"
     message = (
         f"Hello {name},\n\n"
         f"{title} job has been successfully registered.\n\n"
-        f"Details:\n"
-        f"Description: {description}\n"
-        f"Employment Type: {type}\n"
-        f"salary: {salary}\n"
-        f"Location: {location}\n"
-        f"Category: {category}\n"
-        f"Created At: {created_at}\n"
-        f"Deadline: {deadline}\n\n"
-        f"Thank you for joining us!\n\n"
+        f"Thank you for working with us!\n\n"
         f"Best regards,\n"
         f"The Job Board Team"
     )
     send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [email])
 
-    return f"Company Registration email sent to {email}"
+    return f"Company Job Registration email sent to {email}"
 
 @shared_task
 def send_job_application_confirmation_email(email, applicant, title, name, status, applied_at):
@@ -66,4 +57,4 @@ def send_job_application_confirmation_email(email, applicant, title, name, statu
     )
     send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [email])
 
-    return f"Company Registration email sent to {email}"
+    return f"Job application details sent to {email}"
