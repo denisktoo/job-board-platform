@@ -4,16 +4,16 @@ from django.utils import timezone
 
 class JobFilter(django_filters.FilterSet):
     employment_type = django_filters.CharFilter(field_name='employment_type', lookup_expr='iexact')
-    deadline = django_filters.BooleanFilter(method='active_jobs_only')
+    deadline = django_filters.BooleanFilter(method='filter_active_jobs')
 
-    def active_jobs_only(self, queryset, name, value):
+    def filter_active_jobs(self, queryset, name, value):
         if value:
             return queryset.filter(deadline__gte=timezone.now())
         return queryset
 
     class Meta:
         model = Job
-        fields = ['employment_type', 'deadline']
+        fields = ['employment_type', 'deadline', 'category', 'company']
 
 class ApplicationFilter(django_filters.FilterSet):
     # check if resume and cover_letter exists

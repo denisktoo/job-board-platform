@@ -40,6 +40,9 @@ class UserViewSets(viewsets.ModelViewSet):
 class UserApplicationsViewSet(viewsets.ModelViewSet):
     serializer_class = ApplicationSerializer
     permission_classes = [IsApplicantOrAdminUser]
+    filter_backends = [DjangoFilterBackend, SearchFilter]
+    filterset_class = ApplicationFilter
+    search_fields = ['user__username', 'job__title']
 
     def get_queryset(self):
         role = getattr(self.request.user, 'role', None)
@@ -90,6 +93,7 @@ class JobViewSets(viewsets.ModelViewSet):
     serializer_class = JobSerializer
     permission_classes = [IsRecruiterOrAdminUser]
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
+    filterset_class = JobFilter
     search_fields = ['title', 'company__name', 'location']
     ordering_fields = ['salary', 'created_at', 'deadline'] 
 
@@ -126,6 +130,9 @@ class JobApplicationViewSets(viewsets.ModelViewSet):
     serializer_class = ApplicationSerializer
     permission_classes = [IsApplicantOrAdminUser]
     parser_classes = (MultiPartParser, FormParser)
+    filter_backends = [DjangoFilterBackend, SearchFilter]
+    filterset_class = ApplicationFilter
+    search_fields = ['user__username', 'job__title']
 
     def get_queryset(self):
         job_pk = self.kwargs.get('job_pk')
@@ -150,7 +157,9 @@ class JobApplicationViewSets(viewsets.ModelViewSet):
 class CompanyJobApplicationsViewSet(viewsets.ModelViewSet):
     serializer_class = ApplicationSerializer
     permission_classes = [IsRecruiterOrAdminUser]
+    filter_backends = [DjangoFilterBackend, SearchFilter]
     filterset_class = ApplicationFilter
+    search_fields = ['user__username', 'job__title']
 
     def get_queryset(self):
         # Skip logic during Swagger schema generation
