@@ -4,6 +4,8 @@ from .serializer import (
     , ApplicationSerializer, RegisterSerializer
 )
 from rest_framework import viewsets, generics
+from rest_framework.filters import SearchFilter, OrderingFilter
+from django_filters.rest_framework import DjangoFilterBackend
 from .models import User, Company, Category, Job, Application
 from rest_framework.permissions import AllowAny
 from .permissions import (
@@ -17,6 +19,7 @@ from .tasks import (
     , send_job_registration_confirmation_email
 )
 from rest_framework.parsers import MultiPartParser, FormParser
+from .filter import ApplicationFilter, JobFilter
 
 class UserViewSets(viewsets.ModelViewSet):
     queryset = User.objects.all()
@@ -78,10 +81,17 @@ class CategoryViewSets(viewsets.ModelViewSet):
 class PublicJobViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Job.objects.all()
     serializer_class = JobSerializer
+    filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
+    filterset_class = JobFilter
+    search_fields = ['title', 'company__name', 'location']
+    ordering_fields = ['salary', 'created_at', 'deadline'] 
 
 class JobViewSets(viewsets.ModelViewSet):
     serializer_class = JobSerializer
     permission_classes = [IsRecruiterOrAdminUser]
+    filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
+    search_fields = ['title', 'company__name', 'location']
+    ordering_fields = ['salary', 'created_at', 'deadline'] 
 
     def get_queryset(self):
         company_pk = self.kwargs.get('company_pk')
@@ -140,6 +150,7 @@ class JobApplicationViewSets(viewsets.ModelViewSet):
 class CompanyJobApplicationsViewSet(viewsets.ModelViewSet):
     serializer_class = ApplicationSerializer
     permission_classes = [IsRecruiterOrAdminUser]
+    filterset_class = ApplicationFilter
 
     def get_queryset(self):
         # Skip logic during Swagger schema generation
