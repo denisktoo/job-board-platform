@@ -55,7 +55,7 @@ DEFAULT_FROM_EMAIL = env('DEFAULT_FROM_EMAIL')
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-g-xtzb=d==*xj#4wah8jd!s^j$gq2-!9^pvl%$gz)_yfbl$2cy'
+SECRET_KEY = env('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -193,6 +193,8 @@ REST_FRAMEWORK = {
     'DEFAULT_FILTER_BACKENDS': [
         'django_filters.rest_framework.DjangoFilterBackend'
     ],
+    'DEFAULT_PAGINATION_CLASS': 'job_board.pagination.BasePagination',
+    'PAGE_SIZE': 10,
 }
 
 SIMPLE_JWT = {
