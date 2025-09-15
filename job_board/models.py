@@ -1,6 +1,7 @@
 from django.db import models
 import uuid
 from django.contrib.auth.models import AbstractUser
+from django.utils import timezone
 
 class User(AbstractUser):
     user_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, db_index=True)
@@ -54,6 +55,7 @@ class Job(models.Model):
     salary = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True, db_index=True)
     created_at = models.DateTimeField(auto_now_add=True, db_index=True)
     deadline = models.DateTimeField(db_index=True)
+    is_active = models.BooleanField(default=True, db_index=True)
 
     EMPLOYMENT_CHOICES = [
         ('full_time', 'Full Time'),
@@ -67,6 +69,11 @@ class Job(models.Model):
         # Set location to company's location if not specified
         if not self.location and self.company_id:
             self.location = self.company.location
+
+        # Auto-deactivate if deadline is passed
+        if self.deadline < timezone.now().date():
+            self.is_active = False
+
         super().save(*args, **kwargs)
 
     def __str__(self):
@@ -86,6 +93,11 @@ class Application(models.Model):
         ('rejected', 'Rejected'),
     ]
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending', db_index=True)
+    is_completed = models.BooleanField(default=False, db_index=True)
+
+    def save(self, *args, **kwargs):
+        self.is_completed = bool(self.resume and self.cover_letter)
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return f"{self.user.username} - {self.job.title} ({self.status})"

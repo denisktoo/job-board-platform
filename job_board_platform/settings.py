@@ -14,6 +14,7 @@ from pathlib import Path
 import environ
 import os
 from datetime import timedelta
+from celery.schedules import crontab
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -86,6 +87,17 @@ CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = 'UTC'
+
+CELERY_BEAT_SCHEDULE = {
+    'deactivate-expired-jobs-daily': {
+        'task': 'job_board.tasks.deactivate_expired_jobs',
+        'schedule': crontab(hour=0, minute=0),
+    },
+    'send-deadline-reminders-daily': {
+        'task': 'job_board.tasks.send_deadline_reminders',
+        'schedule': crontab(hour=9, minute=0),
+    },
+}
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
