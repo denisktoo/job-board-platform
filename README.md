@@ -1,8 +1,19 @@
 # 💼 Job Board Platform API
 
-A RESTful Job Board API built with **Django REST Framework**, featuring **JWT authentication**, **role-based access**, **company/job management**, **applications with file uploads**, and **search/filtering with pagination**.
+A RESTful Job Board API built with **Django REST Framework**, featuring **JWT authentication**, **role-based access**, **company/job management**, **applications with file uploads**, **search/filtering with pagination**, and **automated job/application scheduling with Celery Beat**.
 
 ---
+
+## 🗂️ Entity Relationship Diagram (ERD)
+
+Here’s the ERD for the project:
+
+![Job Board ERD](https://drive.google.com/uc?export=view\&id=1KUDq3uOOnSMyTpV5Zv8_1qLTsNud6xiW)
+
+👉 [Open ERD in Google Drive](https://drive.google.com/file/d/1KUDq3uOOnSMyTpV5Zv8_1qLTsNud6xiW/view?usp=sharing)
+
+
+```
 
 ## ⚙️ Setup
 
@@ -10,6 +21,13 @@ A RESTful Job Board API built with **Django REST Framework**, featuring **JWT au
 pip install -r requirements.txt
 python manage.py migrate
 python manage.py runserver
+```
+
+Run workers & beat for background tasks:
+
+```bash
+celery -A job_board worker -l info
+celery -A job_board beat -l info
 ```
 
 The API will be available at `http://127.0.0.1:8000/`
@@ -209,6 +227,24 @@ curl -X POST "http://127.0.0.1:8000/api/jobs/7/applications/" \
 
 ---
 
+## 🔄 Scheduled Tasks (Celery Beat)
+
+Two recurring tasks run automatically via **Celery Beat**:
+
+1. **Deactivate expired jobs**
+
+   * Checks jobs past their `deadline`
+   * Sets `is_active = false`
+
+2. **Send application reminders**
+
+   * Reminds recruiters about pending applications
+   * Marks applications as `is_completed = true` once finalized
+
+Configured in **`settings.py`** with `CELERY_BEAT_SCHEDULE`.
+
+---
+
 ## 🔐 Role-Based Access Control
 
 | Role          | Permissions                                                            |
@@ -243,7 +279,12 @@ Paginated list responses:
 * **Advanced Filtering & Search** for jobs and applications
 * **Role-Based Permissions** (User, Recruiter, Admin)
 * **Pagination** for all list endpoints
-* **Email Notifications** via Celery (async job confirmation emails)
+* **Email Notifications** via Celery
+* **Automated Scheduling with Celery Beat** (job expiry + reminders)
+* **Model Enhancements**
+
+  * `Job.is_active` → marks active/expired jobs
+  * `Application.is_completed` → marks finished applications
 
 ---
 
@@ -264,7 +305,36 @@ Stored securely on the server.
 2. Register as a **User** → apply for jobs
 3. Use JWT tokens in request headers
 4. Explore job postings, apply, and manage applications
+5. Celery Beat ensures jobs expire and reminders are automated
 
 For testing, import the provided **Postman collection**.
 
 ---
+
+
+
+
+Perfect 👍 since you already have the ERD image, we can embed it in the README with a Google Drive (or GitHub repo) link.
+
+Here’s how it fits into your updated README:
+
+---
+
+# 💼 Job Board Platform API
+
+A RESTful Job Board API built with **Django REST Framework**, featuring **JWT authentication**, **role-based access**, **company/job management**, **applications with file uploads**, **search/filtering with pagination**, and **automated job/application scheduling with Celery Beat**.
+
+---
+
+## 🗂️ Entity Relationship Diagram (ERD)
+
+Here’s the ERD for the project:
+
+![Job Board ERD](https://drive.google.com/uc?export=view\&id=YOUR_FILE_ID)
+
+👉 [Open ERD in Google Drive](https://drive.google.com/file/d/YOUR_FILE_ID/view?usp=sharing)
+
+
+```
+
+
