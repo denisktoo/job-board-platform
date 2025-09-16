@@ -71,7 +71,7 @@ class Job(models.Model):
             self.location = self.company.location
 
         # Auto-deactivate if deadline is passed
-        if self.deadline < timezone.now().date():
+        if self.deadline.date() < timezone.now().date():
             self.is_active = False
 
         super().save(*args, **kwargs)
@@ -94,6 +94,9 @@ class Application(models.Model):
     ]
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending', db_index=True)
     is_completed = models.BooleanField(default=False, db_index=True)
+
+    class Meta:
+        unique_together = ('user', 'job')
 
     def save(self, *args, **kwargs):
         self.is_completed = bool(self.resume and self.cover_letter)
@@ -126,8 +129,8 @@ class CompanyReview(models.Model):
     comment = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
-    # class Meta:
-    #     unique_together = ('company', 'user')
+    class Meta:
+        unique_together = ('company', 'user')
 
     def __str__(self):
         return f"{self.company.name} review by {self.user.username} ({self.rating}/5)"

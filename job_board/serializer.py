@@ -48,10 +48,10 @@ class ProfileSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Profile
-        fields = ['profile_id', 'user', 'bio', 'linkedin', 'portfolio', 'created_at']
+        fields = ['profile_id', 'user', 'bio', 'linkedin_url', 'portfolio_url', 'created_at']
 
 class CompanyReviewSerializer(serializers.ModelSerializer):
-    compnay = CompanySerializer(read_only=True)
+    company = CompanySerializer(read_only=True)
     user = UserSerializer(read_only=True)
 
     class Meta:

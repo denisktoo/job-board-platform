@@ -1,5 +1,5 @@
 from rest_framework import permissions
-from .models import Company, Job, Application
+from .models import Company, Job, Application, CompanyReview
 
 class IsAdminUser(permissions.BasePermission):
     """
@@ -66,12 +66,15 @@ class IsRecruiterOrAdminUser(permissions.BasePermission):
         if role == "admin":
             return True
 
-        # Recruiter: modify only own company/jobs
+        # Recruiter: modify only own company/jobs bt only view CompanyRevew
         if role == "recruiter":
             if isinstance(obj, Company) and obj.user == request.user:
                 return True
             if isinstance(obj, Job) and obj.company.user == request.user:
                 return True
+            if isinstance(obj, CompanyReview) and obj.company.user == request.user:
+                # Only allow safe operations (read-only)
+                return request.method in permissions.SAFE_METHODS
 
         return False
 

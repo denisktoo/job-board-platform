@@ -206,10 +206,13 @@ class ProfileViewSet(viewsets.ModelViewSet):
     permission_classes = [IsApplicantOrAdmin]
 
     def get_queryset(self):
-        user = self.request.user
-        if user.role == "admin":
+        # Skip logic during Swagger schema generation
+        if getattr(self, "swagger_fake_view", False):
+            return Company.objects.none()
+        
+        if getattr(self.request.user, 'role', None) == "admin":
             return Profile.objects.all()
-        return Profile.objects.filter(user=user)
+        return Profile.objects.filter(user=self.request.user)
 
     def perform_create(self, serializer):
         # Ensure one profile per user
