@@ -1,4 +1,4 @@
-from .models import User, Company, Category, Job, Application
+from .models import User, Company, Category, Job, Application, Profile, CompanyReview
 from rest_framework import serializers
 
 class UserSerializer(serializers.ModelSerializer):
@@ -42,3 +42,18 @@ class RegisterSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         user = User.objects.create_user(**validated_data)
         return user
+
+class ProfileSerializer(serializers.ModelSerializer):
+    user = UserSerializer(read_only=True)
+
+    class Meta:
+        model = Profile
+        fields = ['profile_id', 'user', 'bio', 'linkedin', 'portfolio', 'created_at']
+
+class CompanyReviewSerializer(serializers.ModelSerializer):
+    compnay = CompanySerializer(read_only=True)
+    user = UserSerializer(read_only=True)
+
+    class Meta:
+        model = CompanyReview
+        fields = ['review_id', 'company', 'user', 'rating', 'comment', 'created_at']

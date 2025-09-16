@@ -88,11 +88,19 @@ class IsApplicantOrAdmin(permissions.BasePermission):
         return getattr(request.user, 'role', None) in ['user', 'admin']
 
     def has_object_permission(self, request, view, obj):
-        # Admin can access any object
-        if getattr(request.user, 'role', None) == 'admin':
+        role = getattr(request.user, 'role', None)
+
+        # Admin has complete access
+        if role == 'admin':
             return True
-        # Applicant can access only their own applicaition
-        return obj == request.user
+        
+        # Applicant can access only their own applicaition and profile
+        if role == 'user':
+            if hasattr(obj, 'user'):  # Profile object
+                return obj.user == request.user
+            return obj == request.user  # Application object
+
+        return False
 
 
 class IsApplicantOrAdminUser(permissions.BasePermission):
@@ -108,8 +116,14 @@ class IsApplicantOrAdminUser(permissions.BasePermission):
 
     def has_object_permission(self, request, view, obj):
         role = getattr(request.user, 'role', None)
+
+        # Admin has complete access
         if role == 'admin':
             return True
-        if role == 'user' and obj.user == request.user:
-            return True
+        
+        # Job application ownership
+        if role == 'user':
+            if hasattr(obj, 'user'):
+                return obj.user == request.user
+
         return False

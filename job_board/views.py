@@ -1,13 +1,13 @@
 from django.shortcuts import render
 from .serializer import (
     UserSerializer, CompanySerializer, CategorySerializer, JobSerializer
-    , ApplicationSerializer, RegisterSerializer
+    , ApplicationSerializer, RegisterSerializer, ProfileSerializer, CompanyReviewSerializer
 )
 from rest_framework import viewsets, generics
 from rest_framework.filters import SearchFilter, OrderingFilter
 from django_filters.rest_framework import DjangoFilterBackend
-from .models import User, Company, Category, Job, Application
-from rest_framework.permissions import AllowAny
+from .models import User, Company, Category, Job, Application, Profile, CompanyReview
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from .permissions import (
     IsAdminUser, IsApplicantOrAdminUser, IsRecruiterOrAdminUser, IsApplicantOrAdmin
 )
@@ -199,3 +199,36 @@ class RegisterView(generics.CreateAPIView):
     queryset = User.objects.all()
     serializer_class = RegisterSerializer
     permission_classes = [AllowAny]
+
+class ProfileViewSet(viewsets.ModelViewSet):
+    queryset = Profile.objects.all()
+    serializer_class = ProfileSerializer
+    permission_classes = [IsApplicantOrAdmin]
+
+    def get_queryset(self):
+        user = self.request.user
+        if user.role == "admin":
+            return Profile.objects.all()
+        return Profile.objects.filter(user=user)
+
+    def perform_create(self, serializer):
+        # Ensure one profile per user
+        if Profile.objects.filter(user=self.request.user).exists():
+            raise ValidationError("You already have a profile.")
+        serializer.save(user=self.request.user)
+
+class CompanyReviewViewSet(viewsets.ModelViewSet):
+    serializer_class = CompanyReviewSerializer
+
+    def get_queryset(self):
+        company_pk = self.kwargs.get("company_pk")
+        return CompanyReview.objects.filter(company_id=company_pk)
+
+    def get_permissions(self):
+        if self.action in ["list", "retrieve"]:
+            return [AllowAny()]
+        return [IsApplicantOrAdminUser()]
+
+    def perform_create(self, serializer):
+        company_pk = self.kwargs.get("company_pk")
+        serializer.save(user=self.request.user, company_id=company_pk)
