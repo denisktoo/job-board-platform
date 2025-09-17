@@ -17,9 +17,8 @@ services:
   - type: worker
     name: celery-worker
     env: docker
-    dockerfilePath: ./Dockerfile
+    dockerfilePath: ./Dockerfile.worker
     autoDeploy: true
-    startCommand: celery -A job_board_platform worker -l info
     envVars:
       - key: DATABASE_URL
         fromDatabase:
@@ -33,9 +32,8 @@ services:
   - type: worker
     name: celery-beat
     env: docker
-    dockerfilePath: ./Dockerfile
+    dockerfilePath: ./Dockerfile.beat
     autoDeploy: true
-    startCommand: celery -A job_board_platform beat -l info
     envVars:
       - key: DATABASE_URL
         fromDatabase:

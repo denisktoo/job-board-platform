@@ -81,8 +81,14 @@ INSTALLED_APPS = [
 ]
 
 # Celery Configuration
-CELERY_BROKER_URL = 'amqp://guest:guest@localhost//'  # RabbitMQ default
-CELERY_RESULT_BACKEND = 'rpc://'  # Using RPC backend with RabbitMQ
+CELERY_BROKER_URL = env(
+    'CELERY_BROKER_URL',
+    default='amqp://guest:guest@localhost//'  # fallback for local dev
+)
+CELERY_RESULT_BACKEND = env(
+    'CELERY_RESULT_BACKEND',
+    default='rpc://'  # RabbitMQ default result backend
+)
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
@@ -176,6 +182,8 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = 'static/'
+
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
