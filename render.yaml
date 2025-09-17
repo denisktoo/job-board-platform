@@ -1,0 +1,51 @@
+services:
+  - type: web
+    name: job-board-platform
+    env: docker
+    dockerfilePath: ./Dockerfile
+    autoDeploy: true
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: job-board-db
+          property: connectionString
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: false
+
+  - type: worker
+    name: celery-worker
+    env: docker
+    dockerfilePath: ./Dockerfile
+    autoDeploy: true
+    startCommand: celery -A job_board_platform worker -l info
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: job-board-db
+          property: connectionString
+      - key: SECRET_KEY
+        sync: false
+      - key: DEBUG
+        value: false
+
+  - type: worker
+    name: celery-beat
+    env: docker
+    dockerfilePath: ./Dockerfile
+    autoDeploy: true
+    startCommand: celery -A job_board_platform beat -l info
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: job-board-db
+          property: connectionString
+      - key: SECRET_KEY
+        sync: false
+      - key: DEBUG
+        value: false
+
+databases:
+  - name: job-board-db
+    plan: free
