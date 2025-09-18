@@ -1,4 +1,6 @@
-from .models import User, Company, Category, Job, Application, Profile, CompanyReview
+from .models import (
+    User, Company, Category, Job, Application, Profile, CompanyReview, Notification
+)
 from rest_framework import serializers
 
 class UserSerializer(serializers.ModelSerializer):
@@ -48,7 +50,7 @@ class ProfileSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Profile
-        fields = ['profile_id', 'user', 'bio', 'linkedin_url', 'portfolio_url', 'created_at']
+        fields = ['profile_id', 'user', 'bio', 'linkedin_url', 'portfolio_url', 'created_at', 'location', 'skills', 'experience', 'github_url']
 
 class CompanyReviewSerializer(serializers.ModelSerializer):
     company = CompanySerializer(read_only=True)
@@ -57,3 +59,11 @@ class CompanyReviewSerializer(serializers.ModelSerializer):
     class Meta:
         model = CompanyReview
         fields = ['review_id', 'company', 'user', 'rating', 'comment', 'created_at']
+
+class NotificationSerializer(serializers.ModelSerializer):
+    company = CompanySerializer(read_only=True)
+    user = UserSerializer(read_only=True)
+
+    class Meta:
+        model = Notification
+        fields = ['notification_id', 'company', 'type', 'content', 'is_read', 'created_at']

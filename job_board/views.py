@@ -1,12 +1,15 @@
 from django.shortcuts import render
 from .serializer import (
     UserSerializer, CompanySerializer, CategorySerializer, JobSerializer
-    , ApplicationSerializer, RegisterSerializer, ProfileSerializer, CompanyReviewSerializer
+    , ApplicationSerializer, RegisterSerializer, ProfileSerializer
+    , CompanyReviewSerializer, NotificationSerializer
 )
 from rest_framework import viewsets, generics
 from rest_framework.filters import SearchFilter, OrderingFilter
 from django_filters.rest_framework import DjangoFilterBackend
-from .models import User, Company, Category, Job, Application, Profile, CompanyReview
+from .models import (
+    User, Company, Category, Job, Application, Profile, CompanyReview, Notification
+)
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from .permissions import (
     IsAdminUser, IsApplicantOrAdminUser, IsRecruiterOrAdminUser, IsApplicantOrAdmin
@@ -234,4 +237,27 @@ class CompanyReviewViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         company_pk = self.kwargs.get("company_pk")
+
+        # Validate company existence
+        company = Company.objects.filter(pk=company_pk).first()
+        if not company:
+            raise ValidationError({"company": f"Company with id {company_pk} does not exist."})
+
         serializer.save(user=self.request.user, company_id=company_pk)
+
+class NotificationViewSet(viewsets.ModelViewSet):
+    serializer_class = NotificationSerializer
+
+    def get_queryset(self):
+        user = self.request.user
+        if hasattr(user, 'company'):
+            return Notification.objects.filter(review__company=user.company)
+        return Notification.objects.none()
+    
+    def mark_as_read(self, pk, company):
+        """Mark a specific notification as read, scoped to company"""
+        notification = self.get(pk=pk, review__company=company)
+        if not notification.is_read:
+            notification.is_read = True
+            notification.save(update_fields=["is_read"])
+        return notification

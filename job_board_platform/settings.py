@@ -73,7 +73,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'job_board',
+    'job_board.apps.JobBoardConfig',
     'rest_framework',
     'corsheaders',
     'drf_yasg',
@@ -81,7 +81,7 @@ INSTALLED_APPS = [
 ]
 
 # Celery Configuration
-CELERY_BROKER_URL = 'amqp://guest:guest@localhost//'  # RabbitMQ default
+CELERY_BROKER_URL = 'amqp://guest:guest@localhost:5672//'  # RabbitMQ default port
 CELERY_RESULT_BACKEND = 'rpc://'  # Using RPC backend with RabbitMQ
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
@@ -108,6 +108,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'job_board.middleware.RequestLoggingMiddleware',
 ]
 
 ROOT_URLCONF = 'job_board_platform.urls'

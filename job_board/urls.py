@@ -4,7 +4,7 @@ from rest_framework_nested.routers import NestedDefaultRouter
 from .views import (
     UserViewSets, CompanyViewSets, CategoryViewSets, JobViewSets, JobApplicationViewSets
     , RegisterView, UserApplicationsViewSet, CompanyJobApplicationsViewSet, PublicJobViewSet
-    , ProfileViewSet, CompanyReviewViewSet
+    , ProfileViewSet, CompanyReviewViewSet, NotificationViewSet
 )
 
 router = routers.DefaultRouter()
@@ -20,6 +20,7 @@ job_router.register(r'applications', JobApplicationViewSets, basename='job-appli
 company_router = NestedDefaultRouter(router, r'companies', lookup='company')
 company_router.register(r'jobs', JobViewSets, basename='company-jobs')
 company_router.register(r'reviews', CompanyReviewViewSet, basename='company-reviews')
+company_router.register(r'notifications', NotificationViewSet, basename='company-notifications')
 
 company_job_apps = NestedDefaultRouter(company_router, r'jobs', lookup='job')
 company_job_apps.register(r'applications', CompanyJobApplicationsViewSet, basename='company-job-applications')
