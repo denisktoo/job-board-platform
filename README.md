@@ -8,9 +8,9 @@ A RESTful Job Board API built with **Django REST Framework**, featuring **JWT au
 
 Here’s the ERD for the project:
 
-![Job Board ERD](https://drive.google.com/uc?export=view\&id=1KUDq3uOOnSMyTpV5Zv8_1qLTsNud6xiW)
+![Job Board ERD](https://drive.google.com/uc?export=view\&id=1ts2rpfNEipvvoNfsrpBU6zPF_0tbR-GJ)
 
-👉 [Open ERD in Google Drive](https://drive.google.com/file/d/1KUDq3uOOnSMyTpV5Zv8_1qLTsNud6xiW/view?usp=sharing)
+👉 [Open ERD in Google Drive](https://drive.google.com/file/d/1ts2rpfNEipvvoNfsrpBU6zPF_0tbR-GJ/view?usp=sharing)
 
 ---
 
