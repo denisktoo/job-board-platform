@@ -143,6 +143,12 @@ class JobApplicationViewSets(viewsets.ModelViewSet):
     
     def perform_create(self, serializer):
         job_pk = self.kwargs.get('job_pk')
+        user = self.request.user
+
+        # Check if user already applied for this job
+        if Application.objects.filter(user=user, job_id=job_pk).exists():
+            raise ValidationError("You have already submitted this application.")
+    
         application =  serializer.save(user=self.request.user, job_id=job_pk)
 
         # Call Celery task after saving
