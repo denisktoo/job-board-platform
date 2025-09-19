@@ -4,7 +4,7 @@ from .serializer import (
     , ApplicationSerializer, RegisterSerializer, ProfileSerializer
     , CompanyReviewSerializer, NotificationSerializer
 )
-from rest_framework import viewsets, generics
+from rest_framework import viewsets, generics, status
 from rest_framework.filters import SearchFilter, OrderingFilter
 from django_filters.rest_framework import DjangoFilterBackend
 from .models import (
@@ -24,6 +24,8 @@ from .tasks import (
 from rest_framework.parsers import MultiPartParser, FormParser
 from .filter import ApplicationFilter, JobFilter
 from django.shortcuts import get_object_or_404
+from rest_framework.decorators import action
+from rest_framework.response import Response
 
 class UserViewSets(viewsets.ModelViewSet):
     queryset = User.objects.all()
@@ -246,7 +248,7 @@ class CompanyReviewViewSet(viewsets.ModelViewSet):
         company_pk = self.kwargs.get("company_pk")
 
         # Validate company existence
-        company = get_object_or_404(Company, pk=company_pk)
+        company = get_object_or_404(Company, company_id=company_pk)
 
         # Prevent company owner from reviewing own company
         if company.user == self.request.user:
@@ -257,7 +259,6 @@ class CompanyReviewViewSet(viewsets.ModelViewSet):
 
 class NotificationViewSet(viewsets.ModelViewSet):
     serializer_class = NotificationSerializer
-    permission_classes = [IsRecruiterOrAdminUser]
 
     def get_queryset(self):
         # Skip logic during Swagger schema generation
@@ -282,11 +283,24 @@ class NotificationViewSet(viewsets.ModelViewSet):
 
     def create(self, request, *args, **kwargs):
         raise MethodNotAllowed('POST')
+    
+    # def mark_as_read(self, pk, company):
+    #     """Mark a specific notification as read, scoped to company"""
+    #     notification = get_object_or_404(Notification, notification_id=pk, company=company)
+    #     if not notification.is_read:
+    #         notification.is_read = True
+    #         notification.save(update_fields=["is_read"])
+    #     return notification
 
-    def mark_as_read(self, pk, company):
-        """Mark a specific notification as read, scoped to company"""
+    @action(detail=True, methods=["patch"], url_path="mark-as-read")
+    def mark_as_read(self, request, company_pk=None, pk=None):
+        """Custom route to mark a notification as read"""
+        company = get_object_or_404(Company, company_id=company_pk)
         notification = get_object_or_404(Notification, pk=pk, company=company)
+
         if not notification.is_read:
             notification.is_read = True
             notification.save(update_fields=["is_read"])
-        return notification
+
+        serializer = self.get_serializer(notification)
+        return Response(serializer.data, status=status.HTTP_200_OK)
