@@ -23,6 +23,7 @@ from .tasks import (
 )
 from rest_framework.parsers import MultiPartParser, FormParser
 from .filter import ApplicationFilter, JobFilter
+from django.shortcuts import get_object_or_404
 
 class UserViewSets(viewsets.ModelViewSet):
     queryset = User.objects.all()
@@ -239,30 +240,52 @@ class CompanyReviewViewSet(viewsets.ModelViewSet):
     def get_permissions(self):
         if self.action in ["list", "retrieve"]:
             return [AllowAny()]
-        return [IsApplicantOrAdminUser()]
+        return [IsAuthenticated()]
 
     def perform_create(self, serializer):
         company_pk = self.kwargs.get("company_pk")
 
         # Validate company existence
-        company = Company.objects.filter(pk=company_pk).first()
-        if not company:
-            raise ValidationError({"company": f"Company with id {company_pk} does not exist."})
+        company = get_object_or_404(Company, pk=company_pk)
 
-        serializer.save(user=self.request.user, company_id=company_pk)
+        # Prevent company owner from reviewing own company
+        if company.user == self.request.user:
+            raise PermissionDenied("You cannot post review for your own company")
+
+        # Save the review with current user & company
+        serializer.save(user=self.request.user, company=company)
 
 class NotificationViewSet(viewsets.ModelViewSet):
     serializer_class = NotificationSerializer
+    permission_classes = [IsRecruiterOrAdminUser]
 
     def get_queryset(self):
-        user = self.request.user
-        if hasattr(user, 'company'):
-            return Notification.objects.filter(review__company=user.company)
-        return Notification.objects.none()
-    
+        # Skip logic during Swagger schema generation
+        if getattr(self, "swagger_fake_view", False):
+            return Notification.objects.none()
+
+        company_pk = self.kwargs.get('company_pk')
+
+        # Check if company exists
+        try:
+            company = Company.objects.get(company_id=company_pk)
+        except Company.DoesNotExist:
+            raise NotFound("Company does not exist.")
+
+        # Restrict recruiter to only their own company
+        role = getattr(self.request.user, 'role', None)
+        if role == 'recruiter' and company.user != self.request.user:
+            raise PermissionDenied("You cannot access notifications for another company.")
+
+        # Return all notifications for this company
+        return Notification.objects.filter(company=company)
+
+    def create(self, request, *args, **kwargs):
+        raise MethodNotAllowed('POST')
+
     def mark_as_read(self, pk, company):
         """Mark a specific notification as read, scoped to company"""
-        notification = self.get(pk=pk, review__company=company)
+        notification = get_object_or_404(Notification, pk=pk, company=company)
         if not notification.is_read:
             notification.is_read = True
             notification.save(update_fields=["is_read"])

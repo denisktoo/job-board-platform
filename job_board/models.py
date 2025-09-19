@@ -134,7 +134,8 @@ class CompanyReview(models.Model):
     
 class Notification(models.Model):
     notification_id = models.AutoField(primary_key=True)
-    review = models.ForeignKey('CompanyReview', on_delete=models.CASCADE, related_name='notifications', db_index=True)
+    user = models.ForeignKey('User', on_delete=models.CASCADE, related_name='notifications', db_index=True, null=True, blank=True)
+    company = models.ForeignKey('Company', on_delete=models.CASCADE, related_name='notifications', db_index=True, null=True, blank=True)
 
     TYPE_CHOICES = [
         ('review', 'Review')
