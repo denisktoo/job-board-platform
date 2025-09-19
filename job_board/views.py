@@ -273,30 +273,46 @@ class NotificationViewSet(viewsets.ModelViewSet):
         except Company.DoesNotExist:
             raise NotFound("Company does not exist.")
 
-        # Restrict recruiter to only their own company
         role = getattr(self.request.user, 'role', None)
-        if role == 'recruiter' and company.user != self.request.user:
-            raise PermissionDenied("You cannot access notifications for another company.")
 
-        # Return all notifications for this company
-        return Notification.objects.filter(company=company)
+        # Admins can see all
+        if role == 'admin':
+            return Notification.objects.filter(company=company)
+
+        # Recruiters only see their own company's notifications
+        if role == 'recruiter':
+            if company.user != self.request.user:
+                raise PermissionDenied("You cannot access notifications for another company.")
+            return Notification.objects.filter(company=company)
+
+        # Applicants (or any other role) have no access
+        raise PermissionDenied("You do not have permission to access this request.")
 
     def create(self, request, *args, **kwargs):
         raise MethodNotAllowed('POST')
-    
-    # def mark_as_read(self, pk, company):
-    #     """Mark a specific notification as read, scoped to company"""
-    #     notification = get_object_or_404(Notification, notification_id=pk, company=company)
-    #     if not notification.is_read:
-    #         notification.is_read = True
-    #         notification.save(update_fields=["is_read"])
-    #     return notification
 
     @action(detail=True, methods=["patch"], url_path="mark-as-read")
     def mark_as_read(self, request, company_pk=None, pk=None):
         """Custom route to mark a notification as read"""
+
+        # Ensure company exists
         company = get_object_or_404(Company, company_id=company_pk)
-        notification = get_object_or_404(Notification, pk=pk, company=company)
+
+        role = getattr(request.user, 'role', None)
+
+        # Admins can mark any company's notifications
+        if role == 'admin':
+            notification = get_object_or_404(Notification, pk=pk, company=company)
+
+        # Recruiters can only mark their own company's notifications
+        elif role == 'recruiter':
+            if company.user != request.user:
+                raise PermissionDenied("You cannot mark notifications for another company.")
+            notification = get_object_or_404(Notification, pk=pk, company=company)
+
+        # user role cannot mark notifications
+        else:
+            raise PermissionDenied("You do not have permission to perform this action.")
 
         if not notification.is_read:
             notification.is_read = True

@@ -6,7 +6,8 @@ from .models import CompanyReview, Notification
 def create_company_review_notification(sender, instance, created, **kwargs):
     if created:
         Notification.objects.create(
-            review=instance,
+            company=instance.company,
+            user=instance.user,
             type='review',
             content=f"New review by {instance.user.username}: {instance.comment[:50]}"
         )
