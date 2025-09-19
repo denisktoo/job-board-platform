@@ -1,5 +1,5 @@
 import django_filters
-from .models import Application, Job
+from .models import Application, Job, Profile, CompanyReview, Notification
 from django.utils import timezone
 
 class JobFilter(django_filters.FilterSet):
@@ -33,3 +33,31 @@ class ApplicationFilter(django_filters.FilterSet):
     class Meta:
         model = Application
         fields = ['status', 'job', 'user']
+
+class ProfileFilter(django_filters.FilterSet):
+    location = django_filters.CharFilter(field_name='location', lookup_expr='icontains')
+    skills = django_filters.CharFilter(field_name='skills', lookup_expr='icontains')
+    experience = django_filters.CharFilter(field_name='experience', lookup_expr='icontains')
+
+    class Meta:
+        model = Profile
+        fields = ['location', 'skills', 'experience']
+
+class CompanyReviewFilter(django_filters.FilterSet):
+    company = django_filters.NumberFilter(field_name='company_id', lookup_expr='exact')
+    user = django_filters.NumberFilter(field_name='user_id', lookup_expr='exact')
+    rating_min = django_filters.NumberFilter(field_name='rating', lookup_expr='gte')
+    rating_max = django_filters.NumberFilter(field_name='rating', lookup_expr='lte')
+
+    class Meta:
+        model = CompanyReview
+        fields = {'company', 'user', 'rating'}
+
+class NotificationFilter(django_filters.FilterSet):
+    user = django_filters.NumberFilter(field_name='user_id', lookup_expr='exact')
+    company = django_filters.NumberFilter(field_name='company_id', lookup_expr='exact')
+    is_read = django_filters.BooleanFilter(field_name='is_read')
+  
+    class Meta:
+        model = Notification
+        fields = ['user', 'company', 'is_read']

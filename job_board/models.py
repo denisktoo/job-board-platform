@@ -110,12 +110,12 @@ class Profile(models.Model):
     user = models.OneToOneField('User', on_delete=models.CASCADE, related_name="profile")
     bio = models.TextField(blank=True, null=True)
     location = models.CharField(max_length=255, blank=True, null=True, db_index=True)
-    skills = models.TextField(blank=True, null=True)
-    experience = models.TextField(blank=True, null=True)
-    linkedin_url = models.URLField(blank=True, null=True)
-    github_url = models.URLField(blank=True, null=True)
-    portfolio_url = models.URLField(blank=True, null=True)
-    created_at = models.DateTimeField(auto_now_add=True)
+    skills = models.TextField(blank=True, null=True, db_index=True)
+    experience = models.TextField(blank=True, null=True, db_index=True)
+    linkedin_url = models.URLField(blank=True, null=True, db_index=True)
+    github_url = models.URLField(blank=True, null=True, db_index=True)
+    portfolio_url = models.URLField(blank=True, null=True, db_index=True)
+    created_at = models.DateTimeField(auto_now_add=True, db_index=True)
 
     def __str__(self):
         return f"Profile of {self.user.username}"
@@ -123,11 +123,11 @@ class Profile(models.Model):
 
 class CompanyReview(models.Model):
     review_id = models.AutoField(primary_key=True)
-    company = models.ForeignKey('Company', on_delete=models.CASCADE, related_name="reviews")
-    user = models.ForeignKey('User', on_delete=models.CASCADE, related_name="company_reviews")
+    company = models.ForeignKey('Company', on_delete=models.CASCADE, related_name="reviews", db_index=True)
+    user = models.ForeignKey('User', on_delete=models.CASCADE, related_name="company_reviews", db_index=True)
     rating = models.PositiveSmallIntegerField()
     comment = models.TextField(blank=True, null=True)
-    created_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(auto_now_add=True, db_index=True)
 
     def __str__(self):
         return f"{self.company.name} review by {self.user.username} ({self.rating}/5)"

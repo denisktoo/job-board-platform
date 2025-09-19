@@ -22,7 +22,9 @@ from .tasks import (
     , send_job_registration_confirmation_email
 )
 from rest_framework.parsers import MultiPartParser, FormParser
-from .filter import ApplicationFilter, JobFilter
+from .filter import (
+    ApplicationFilter, JobFilter, ProfileFilter, NotificationFilter, CompanyReviewFilter
+)
 from django.shortcuts import get_object_or_404
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -216,6 +218,8 @@ class ProfileViewSet(viewsets.ModelViewSet):
     queryset = Profile.objects.all()
     serializer_class = ProfileSerializer
     permission_classes = [IsApplicantOrAdmin]
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = ProfileFilter
 
     def get_queryset(self):
         # Skip logic during Swagger schema generation
@@ -234,6 +238,8 @@ class ProfileViewSet(viewsets.ModelViewSet):
 
 class CompanyReviewViewSet(viewsets.ModelViewSet):
     serializer_class = CompanyReviewSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = CompanyReviewFilter
 
     def get_queryset(self):
         company_pk = self.kwargs.get("company_pk")
@@ -259,6 +265,8 @@ class CompanyReviewViewSet(viewsets.ModelViewSet):
 
 class NotificationViewSet(viewsets.ModelViewSet):
     serializer_class = NotificationSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = NotificationFilter
 
     def get_queryset(self):
         # Skip logic during Swagger schema generation
