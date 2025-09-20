@@ -28,6 +28,7 @@ from .filter import (
 from django.shortcuts import get_object_or_404
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from django.http import JsonResponse
 
 class UserViewSets(viewsets.ModelViewSet):
     queryset = User.objects.all()
@@ -328,3 +329,10 @@ class NotificationViewSet(viewsets.ModelViewSet):
 
         serializer = self.get_serializer(notification)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+def home(request):
+    return JsonResponse({
+        "message": "Job Board API is live 🚀",
+        "docs": "/api/docs/",
+        "api_base": "/api/"
+    })
