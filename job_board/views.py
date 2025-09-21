@@ -294,7 +294,7 @@ class NotificationViewSet(viewsets.ModelViewSet):
                 raise PermissionDenied("You cannot access notifications for another company.")
             return Notification.objects.filter(company=company)
 
-        # Applicants (or any other role) have no access
+        # Users have no access
         raise PermissionDenied("You do not have permission to access this request.")
 
     def create(self, request, *args, **kwargs):
@@ -331,8 +331,11 @@ class NotificationViewSet(viewsets.ModelViewSet):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 def home(request):
-    return JsonResponse({
-        "message": "Job Board API is live 🚀",
-        "docs": "/api/docs/",
-        "api_base": "/api/"
-    })
+    return JsonResponse(
+        {
+            "message": "Job Board API is live 🚀",
+            "docs": "/api/docs/",
+            "api_base": "/api/"
+        },
+        json_dumps_params={"ensure_ascii": False}
+    )

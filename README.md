@@ -1,6 +1,16 @@
 # 💼 Job Board Platform API
 
-A RESTful Job Board API built with **Django REST Framework**, featuring **JWT authentication**, **role-based access**, **company/job management**, **applications with file uploads**, **search/filtering with pagination**, and **automated scheduling with Celery Beat**.
+A RESTful Job Board API built with **Django REST Framework**, featuring:
+
+* **JWT authentication**
+* **Role-based access (User, Recruiter, Admin)**
+* **Company & Job management**
+* **Applications with file uploads**
+* **Search & filtering with pagination**
+* **Email notifications with Celery**
+* **Automated scheduling with Celery Beat**
+* **Signals for real-time notifications**
+* **Custom middleware for request logging**
 
 ---
 
@@ -8,9 +18,7 @@ A RESTful Job Board API built with **Django REST Framework**, featuring **JWT au
 
 Here’s the ERD for the project:
 
-![Job Board ERD](https://drive.google.com/uc?export=view\&id=1ts2rpfNEipvvoNfsrpBU6zPF_0tbR-GJ)
-
-👉 [Open ERD in Google Drive](https://drive.google.com/file/d/1ts2rpfNEipvvoNfsrpBU6zPF_0tbR-GJ/view?usp=sharing)
+![Job Board ERD](https://drive.google.com/uc?export=view\&id=1x8y6ffKxhzfraZvwiieiCx8odegva9jx)
 
 ---
 
@@ -22,13 +30,21 @@ python manage.py migrate
 python manage.py runserver
 ```
 
-Run Celery worker **with Beat scheduler**:
+### Run Celery Worker
 
 ```bash
-celery -A job_board_platform worker -B -l info
+celery -A job_board_platform worker --loglevel=info --pool=threads
+```
+
+### Run Celery Beat
+
+```bash
+celery -A job_board_platform beat --loglevel=info
 ```
 
 The API will be available at `http://127.0.0.1:8000/`
+
+Production deployment available here: **[Job Board Platform on Render](https://job-board-platform-fcav.onrender.com/)**
 
 ---
 
@@ -79,23 +95,12 @@ Authorization: Bearer <access_token>
 
 ## 👥 User Management
 
-### List All Users (Admin only)
+* **List All Users (Admin only)** → `GET /api/users/`
+* **View Own Applications (User/Admin)** → `GET /api/users/{user_id}/applications/`
+* **Search Own Applications (User/Admin)** → `GET /api/users/{user_id}/applications/?search=Market`
+* **Update Own Application (User/Admin)** → `PATCH /api/users/{user_id}/applications/{application_id}/`
 
-**GET** `/api/users/`
-
-### View Own Applications (User/Admin)
-
-**GET** `/api/users/{user_id}/applications/`
-
-### Search Own Applications (User/Admin)
-
-**GET** `/api/users/{user_id}/applications/?search=Market`
-
-### Update Own Application (User/Admin)
-
-**PATCH** `/api/users/{user_id}/applications/{application_id}/`
-
-Since updates may include new files, use **multipart/form-data**:
+Supports **multipart/form-data** for file updates:
 
 ```bash
 curl -X PATCH "http://127.0.0.1:8000/api/users/{user_id}/applications/{application_id}/" \
@@ -107,108 +112,39 @@ curl -X PATCH "http://127.0.0.1:8000/api/users/{user_id}/applications/{applicati
 
 ## 🏢 Company Management
 
-### Create Company (Recruiter/Admin)
-
-**POST** `/api/companies/`
-
-```json
-{
-  "name": "RomaxCorp",
-  "email": "kibet.evans95@gmail.com",
-  "location": "Nairobi, Kenya",
-  "industry": "Software"
-}
-```
-
-### List Companies (Public)
-
-**GET** `/api/companies/`
-
-### Create Job under a Company (Recruiter/Admin)
-
-**POST** `/api/companies/{company_id}/jobs/`
-
-```json
-{
-  "title": "Backend Developer",
-  "description": "Work on scalable APIs using Django REST Framework.",
-  "category_id": 1,
-  "salary": "150000.00",
-  "deadline": "2025-12-31T23:59:59Z",
-  "employment_type": "full_time"
-}
-```
-
-### List Jobs for a Company (Public)
-
-**GET** `/api/companies/{company_id}/jobs/`
-
-### View Applications for a Job (Recruiter/Admin)
-
-**GET** `/api/companies/{company_id}/jobs/{job_id}/applications/`
-
-### Filter Applications (Recruiter/Admin)
-
-**GET** `/api/companies/{company_id}/jobs/{job_id}/applications/?resume=true&cover_letter=true`
-
-### Update Application Status (Recruiter/Admin)
-
-**PATCH** `/api/companies/{company_id}/jobs/{job_id}/applications/{application_id}/`
-
-```json
-{
-  "status": "accepted"
-}
-```
+* **Create Company (Recruiter/Admin)** → `POST /api/companies/`
+* **List Companies (Public)** → `GET /api/companies/`
+* **Create Job under a Company (Recruiter/Admin)** → `POST /api/companies/{company_id}/jobs/`
+* **List Jobs for a Company (Public)** → `GET /api/companies/{company_id}/jobs/`
+* **View Applications for a Job (Recruiter/Admin)** → `GET /api/companies/{company_id}/jobs/{job_id}/applications/`
+* **Filter Applications (Recruiter/Admin)** → `GET /api/companies/{company_id}/jobs/{job_id}/applications/?resume=true&cover_letter=true`
+* **Update Application Status (Recruiter/Admin)** → `PATCH /api/companies/{company_id}/jobs/{job_id}/applications/{application_id}/`
 
 ---
 
 ## 📂 Categories
 
-### Create Category (Admin only)
-
-**POST** `/api/categories/`
-
-```json
-{
-  "name": "Software Engineering",
-  "description": "Jobs related to software development."
-}
-```
-
-### List Categories (Public)
-
-**GET** `/api/categories/`
-
-### Update Category (Admin only)
-
-**PATCH** `/api/categories/{category_id}/`
+* **Create Category (Admin only)** → `POST /api/categories/`
+* **List Categories (Public)** → `GET /api/categories/`
+* **Update Category (Admin only)** → `PATCH /api/categories/{category_id}/`
 
 ---
 
 ## 💼 Jobs
 
-### List All Jobs (Public)
+* **List All Jobs (Public)** → `GET /api/jobs/`
+* **Paginated Jobs** → `GET /api/jobs/?page=3`
+* **Filter & Search Jobs** →
 
-**GET** `/api/jobs/`
-
-### Paginated Jobs
-
-**GET** `/api/jobs/?page=3`
-
-### Filter & Search Jobs
-
-* By employment type: `/api/jobs/?employment_type=full_time`
-* By deadline: `/api/jobs/?deadline=2025-12-31`
-* By title/company/location (search): `/api/jobs/?search=Engineer`
+  * By employment type: `/api/jobs/?employment_type=full_time`
+  * By deadline: `/api/jobs/?deadline=2025-12-31`
+  * By search (title/company/location): `/api/jobs/?search=Engineer`
 
 ---
 
 ## 📝 Job Applications
 
-### Apply to a Job (User)
-
-**POST** `/api/jobs/{job_id}/applications/`
+* **Apply to a Job (User)** → `POST /api/jobs/{job_id}/applications/`
 
 Requires **multipart/form-data**:
 
@@ -219,9 +155,7 @@ curl -X POST "http://127.0.0.1:8000/api/jobs/7/applications/" \
   -F "resume=@/path/to/resume.pdf"
 ```
 
-### View Own Applications (User/Admin)
-
-**GET** `/api/users/{user_id}/applications/`
+* **View Own Applications (User/Admin)** → `GET /api/users/{user_id}/applications/`
 
 ---
 
@@ -237,7 +171,7 @@ curl -X POST "http://127.0.0.1:8000/api/jobs/7/applications/" \
 
 ## 📊 Response Format
 
-Paginated list responses:
+Example paginated response:
 
 ```json
 {
@@ -252,18 +186,29 @@ Paginated list responses:
 
 ---
 
-## 🔧 Features
+## 🔧 Features & Background Tasks
 
-* **JWT Authentication** with refresh tokens
-* **File Uploads** (resumes, cover letters) via multipart/form-data
-* **Advanced Filtering & Search** for jobs and applications
-* **Role-Based Permissions** (User, Recruiter, Admin)
-* **Pagination** for all list endpoints
-* **Email Notifications** via Celery (async tasks)
-* **Celery Beat Automation**:
+### ✅ Celery (Async Emails)
 
-  * Deactivate jobs after deadline
-  * Send email reminders 5 days before deadline
+* Sends emails asynchronously for:
+
+  * Company registration confirmation
+  * Job registration confirmation
+  * Job application confirmation
+
+### ✅ Celery Beat (Scheduled Tasks)
+
+* Deactivates jobs automatically after deadline
+* Sends application reminders 5 days before job deadline
+
+### ✅ Signals
+
+* When a new `CompanyReview` is created, a `Notification` is automatically generated via Django signals.
+
+### ✅ Middleware
+
+* Custom `RequestLoggingMiddleware` logs each request with timestamp, user, and path into `requests.log`.
+* Integrates with JWT authentication to resolve user identity.
 
 ---
 
@@ -273,7 +218,28 @@ Paginated list responses:
 2. Register as a **User** → apply for jobs
 3. Use JWT tokens in request headers
 4. Explore job postings, apply, and manage applications
+5. Check `requests.log` for API request history
 
 For testing, import the provided **Postman collection**.
+
+---
+
+## ⚙️ CI/CD & Deployment
+
+This project is deployed on **Render Free Tier** with CI/CD powered by **GitHub Actions**.
+
+### 🔹 Render Config (`render.yaml`)
+
+Defines web service & free PostgreSQL database with environment variables.
+
+### 🔹 Continuous Integration (`.github/workflows/ci.yml`)
+
+Runs tests on every push and pull request.
+
+### 🔹 Continuous Deployment (`.github/workflows/dep.yml`)
+
+Automatically triggers a Render deploy when code is pushed to `main`.
+
+Secrets (`RENDER_API_KEY`, `RENDER_SERVICE_ID`) are configured in **GitHub Secrets**. Other sensitive values like `SECRET_KEY`, database credentials, and email configs are stored in **.env** (local) and in **Render Dashboard** (production), never hardcoded.
 
 ---
