@@ -92,6 +92,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'drf_yasg',
     'django_filters',
+    'rest_framework_simplejwt.token_blacklist',
 ]
 
 # Celery Configuration
