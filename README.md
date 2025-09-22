@@ -49,7 +49,7 @@ celery -A job_board_platform beat --loglevel=info
 
 The API will be available at `http://127.0.0.1:8000/`
 
-Production deployment available here: **[https://job-board-platform-fcav.onrender.com/](https://job-board-platform-fcav.onrender.com/)**
+Production deployment available here: **[Job Board Platform on Render](https://job-board-platform-fcav.onrender.com/)**
 
 ---
 
