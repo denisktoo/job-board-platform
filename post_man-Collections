@@ -119,13 +119,13 @@
 				"header": [
 					{
 						"key": "Authorization",
-						"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzU4NTAyMzU3LCJpYXQiOjE3NTg0OTg3NTcsImp0aSI6ImViM2I1ZGZkNWY4MzQ3MGI5ZDgzMWQ4MmMzYmQwODU5IiwidXNlcl9pZCI6ImZhNGVhOTljLWEyMTctNDFmMS05MDkzLWE2MWM3MzQzZGViZSJ9.DsmJlQ5HXB-kFlPNsrulRkrHOvRJEAN__ehjirxcoTM",
+						"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzU4NTQyMjQwLCJpYXQiOjE3NTg1Mzg2NDAsImp0aSI6IjY5YzIwYjc3NzYxZjRlM2M4MTk5ODI4NjM4ODM1OTY2IiwidXNlcl9pZCI6ImZhNGVhOTljLWEyMTctNDFmMS05MDkzLWE2MWM3MzQzZGViZSJ9.Idk4aCru6anmL26ZS86zIk3Mc_B4AVVezFwq6-jqmrM",
 						"type": "text"
 					}
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"refresh\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoicmVmcmVzaCIsImV4cCI6MTc1ODU4NTE1NywiaWF0IjoxNzU4NDk4NzU3LCJqdGkiOiJjNmQ4ZDA4YTU5NzY0ZTEwYTVmZWFjMjFiMDNiOTI3ZSIsInVzZXJfaWQiOiJmYTRlYTk5Yy1hMjE3LTQxZjEtOTA5My1hNjFjNzM0M2RlYmUifQ.0RIGQ9AECwnDcNZwrRyVVnydRgbhUb72uJ3oP0bce6Y\"\r\n}",
+					"raw": "{\r\n    \"refresh\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoicmVmcmVzaCIsImV4cCI6MTc1ODYyNTA0MCwiaWF0IjoxNzU4NTM4NjQwLCJqdGkiOiJiM2JiNzE3NTVlMDk0NmQzOGE0OGVkYzczOTMwOTIwYiIsInVzZXJfaWQiOiJmYTRlYTk5Yy1hMjE3LTQxZjEtOTA5My1hNjFjNzM0M2RlYmUifQ.r3MLOWY9T1992Gy5uNGhiIZkge8zjobSgm3qmxt5gkU\"\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -133,7 +133,7 @@
 					}
 				},
 				"url": {
-					"raw": "http://127.0.0.1:8000/api/token/logout/",
+					"raw": "http://127.0.0.1:8000/api/logout/",
 					"protocol": "http",
 					"host": [
 						"127",
@@ -144,7 +144,6 @@
 					"port": "8000",
 					"path": [
 						"api",
-						"token",
 						"logout",
 						""
 					]

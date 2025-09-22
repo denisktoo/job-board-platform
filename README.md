@@ -1,3 +1,7 @@
+Below is the **complete, updated README.md** that includes the **Company Review** endpoints and all the changes we discussed (logout, home vs api root, profile access rules, Celery worker/beat split, notifications via signals, CI/CD & Render notes, recent commits, Postman collection note, etc.). Copy this into your `README.md`.
+
+---
+
 # 💼 Job Board Platform API
 
 A RESTful Job Board API built with **Django REST Framework**, featuring:
@@ -10,7 +14,7 @@ A RESTful Job Board API built with **Django REST Framework**, featuring:
 * **Search & filtering with pagination**
 * **Email notifications with Celery**
 * **Automated scheduling with Celery Beat**
-* **Signals for real-time notifications**
+* **Signals for real-time notifications (reviews → notifications)**
 * **Custom middleware for request logging**
 
 ---
@@ -23,7 +27,7 @@ Here’s the ERD for the project:
 
 ---
 
-## ⚙️ Setup
+## ⚙️ Setup (local)
 
 ```bash
 pip install -r requirements.txt
@@ -31,13 +35,13 @@ python manage.py migrate
 python manage.py runserver
 ```
 
-### Run Celery Worker
+### Run Celery Worker (process tasks)
 
 ```bash
 celery -A job_board_platform worker --loglevel=info --pool=threads
 ```
 
-### Run Celery Beat
+### Run Celery Beat (scheduler)
 
 ```bash
 celery -A job_board_platform beat --loglevel=info
@@ -45,7 +49,7 @@ celery -A job_board_platform beat --loglevel=info
 
 The API will be available at `http://127.0.0.1:8000/`
 
-Production deployment available here: **[Job Board Platform on Render](https://job-board-platform-fcav.onrender.com/)**
+Production deployment available here: **[https://job-board-platform-fcav.onrender.com/](https://job-board-platform-fcav.onrender.com/)**
 
 ---
 
@@ -54,6 +58,7 @@ Production deployment available here: **[Job Board Platform on Render](https://j
 ### Register User
 
 **POST** `/api/register/`
+Request example:
 
 ```json
 {
@@ -69,6 +74,7 @@ Production deployment available here: **[Job Board Platform on Render](https://j
 ### Login (JWT)
 
 **POST** `/api/token/`
+Request example:
 
 ```json
 {
@@ -77,7 +83,7 @@ Production deployment available here: **[Job Board Platform on Render](https://j
 }
 ```
 
-**Response:**
+Response:
 
 ```json
 {
@@ -86,10 +92,14 @@ Production deployment available here: **[Job Board Platform on Render](https://j
 }
 ```
 
-### Logout
+### Refresh Token
+
+**POST** `/api/token/refresh/`
+Request: `{ "refresh": "<your_refresh_token>" }`
+
+### Logout (blacklist refresh token)
 
 **POST** `/api/logout/`
-
 Request:
 
 ```json
@@ -106,15 +116,22 @@ Response:
 }
 ```
 
+> Notes: logout requires `rest_framework_simplejwt.token_blacklist` enabled in `INSTALLED_APPS` and `migrate` run. The endpoint blacklists the refresh token so it cannot obtain new access tokens.
+
+All protected endpoints require the header:
+
+```
+Authorization: Bearer <access_token>
+```
+
 ---
 
-## 🏠 Home API Status
+## 🏠 Home & API Roots
 
 ### Project Root (`/`)
 
 **GET** `/`
-
-Returns a simple JSON status confirming the API is live:
+Returns a simple API status JSON:
 
 ```json
 {
@@ -124,13 +141,10 @@ Returns a simple JSON status confirming the API is live:
 }
 ```
 
----
-
 ### API Root (`/api/`)
 
 **GET** `/api/`
-
-Returns the DRF API root with resource links:
+DRF API root — returns links to top-level resources:
 
 ```json
 {
@@ -144,12 +158,12 @@ Returns the DRF API root with resource links:
 
 ---
 
-## 👤 Profile Management (User/Admin)
+## 👤 Profile Management (User/Admin only)
 
 * **Create or Update Profile (User/Admin)** → `POST /api/profile/` or `PATCH /api/profile/{profile_id}/`
 * **View Profile (User/Admin)** → `GET /api/profile/{profile_id}/`
 
-Example request:
+Example request body:
 
 ```json
 {
@@ -163,6 +177,8 @@ Example request:
 }
 ```
 
+> Notes: `user` is set from `request.user` (authenticated). Only users and admins can access these endpoints.
+
 ---
 
 ## 👥 User Management
@@ -172,7 +188,7 @@ Example request:
 * **Search Own Applications (User/Admin)** → `GET /api/users/{user_id}/applications/?search=Market`
 * **Update Own Application (User/Admin)** → `PATCH /api/users/{user_id}/applications/{application_id}/`
 
-Supports **multipart/form-data** for file updates:
+Supports multipart form for file updates:
 
 ```bash
 curl -X PATCH "http://127.0.0.1:8000/api/users/{user_id}/applications/{application_id}/" \
@@ -194,6 +210,50 @@ curl -X PATCH "http://127.0.0.1:8000/api/users/{user_id}/applications/{applicati
 
 ---
 
+## ⭐ Company Reviews & Notifications
+
+**Company Review Endpoints**
+
+* **Create Review (authenticated user)** → `POST /api/companies/{company_id}/reviews/`
+  Request example:
+
+  ```json
+  {
+    "rating": 5,
+    "comment": "Great interview process and supportive team."
+  }
+  ```
+* **List Reviews for Company (public)** → `GET /api/companies/{company_id}/reviews/`
+* **Get Review (public)** → `GET /api/companies/{company_id}/reviews/{review_id}/`
+
+**Notifications**
+
+* A `CompanyReview` `post_save` signal automatically creates a `Notification` for the company (via your signals).
+* **List Notifications (Recruiter/Admin)** → `GET /api/companies/{company_id}/notifications/`
+* **Mark Notification as Read (Recruiter/Admin)** →
+  `PATCH /api/companies/{company_id}/notifications/{notification_id}/mark-as-read/`
+
+**Request Headers:**
+
+```
+Authorization: Bearer <access_token>
+```
+
+**Response Example:**
+
+```json
+{
+  "id": 5,
+  "company": 1,
+  "type": "review",
+  "content": "New review added to your company.",
+  "is_read": true,
+  "created_at": "2025-09-22T12:34:56Z"
+}
+```
+
+---
+
 ## 📂 Categories
 
 * **Create Category (Admin only)** → `POST /api/categories/`
@@ -210,23 +270,21 @@ curl -X PATCH "http://127.0.0.1:8000/api/users/{user_id}/applications/{applicati
 
   * By employment type: `/api/jobs/?employment_type=full_time`
   * By deadline: `/api/jobs/?deadline=2025-12-31`
-  * By search (title/company/location): `/api/jobs/?search=Engineer`
+  * Search (title/company/location): `/api/jobs/?search=Engineer`
 
 ---
 
 ## 📝 Job Applications
 
 * **Apply to a Job (User)** → `POST /api/jobs/{job_id}/applications/`
+  Requires multipart/form-data:
 
-Requires **multipart/form-data**:
-
-```bash
-curl -X POST "http://127.0.0.1:8000/api/jobs/7/applications/" \
-  -H "Authorization: Bearer <your_token>" \
-  -F "cover_letter=@/path/to/cover_letter.pdf" \
-  -F "resume=@/path/to/resume.pdf"
-```
-
+  ```bash
+  curl -X POST "http://127.0.0.1:8000/api/jobs/7/applications/" \
+    -H "Authorization: Bearer <your_token>" \
+    -F "cover_letter=@/path/to/cover_letter.pdf" \
+    -F "resume=@/path/to/resume.pdf"
+  ```
 * **View Own Applications (User/Admin)** → `GET /api/users/{user_id}/applications/`
 
 ---
@@ -275,25 +333,35 @@ Example paginated response:
 
 ### ✅ Signals
 
-* When a new `CompanyReview` is created, a `Notification` is automatically generated via Django signals.
+* Creating a `CompanyReview` triggers a `Notification` via `post_save` signal.
 
 ### ✅ Middleware
 
-* Custom `RequestLoggingMiddleware` logs each request with timestamp, user, and path into `requests.log`.
-* Integrates with JWT authentication to resolve user identity.
+* `RequestLoggingMiddleware` logs each request (timestamp, user, path) into `requests.log`.
+* If JWT is present, middleware resolves user identity using `rest_framework_simplejwt.authentication.JWTAuthentication`.
 
 ---
 
-## 🚀 Getting Started
+## ✅ Swagger / Static files (notes)
+
+If Swagger UI looks broken (missing CSS/JS), ensure:
+
+1. `drf_yasg` is installed and in `INSTALLED_APPS`.
+2. Run `python manage.py collectstatic`.
+3. In production, use WhiteNoise or proper static serving (Render: `collectstatic` runs during build if configured).
+
+---
+
+## 🚀 Getting Started / Workflow
 
 1. Register as a **Recruiter** → create companies & jobs
 2. Register as a **User** → apply for jobs
 3. Use JWT tokens in request headers
 4. Explore job postings, apply, and manage applications
-5. Create and update your profile
+5. Create and update your profile (User/Admin)
 6. Check `requests.log` for API request history
 
-For testing, import the provided **Postman collection**.
+For testing, import the included **Postman collection** (`Job Board Platform.postman_collection.json`) into Postman.
 
 ---
 
@@ -301,18 +369,10 @@ For testing, import the provided **Postman collection**.
 
 This project is deployed on **Render Free Tier** with CI/CD powered by **GitHub Actions**.
 
-### 🔹 Render Config (`render.yaml`)
+* `render.yaml` defines the web service and free PostgreSQL database.
+* `.github/workflows/ci.yml` runs tests on pushes and PRs.
+* `.github/workflows/dep.yml` triggers Render deploys for `main`.
 
-Defines web service & free PostgreSQL database with environment variables.
-
-### 🔹 Continuous Integration (`.github/workflows/ci.yml`)
-
-Runs tests on every push and pull request.
-
-### 🔹 Continuous Deployment (`.github/workflows/dep.yml`)
-
-Automatically triggers a Render deploy when code is pushed to `main`.
-
-Secrets (`RENDER_API_KEY`, `RENDER_SERVICE_ID`) are configured in **GitHub Secrets**. Other sensitive values like `SECRET_KEY`, database credentials, and email configs are stored in **.env** (local) and in **Render Dashboard** (production), never hardcoded.
+**Secrets**: `RENDER_API_KEY` and `RENDER_SERVICE_ID` are stored in GitHub Secrets. Other sensitive values (`SECRET_KEY`, DB creds, email config) live in `.env` locally and in Render Dashboard for production — never hardcoded.
 
 ---
