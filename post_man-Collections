@@ -1,0 +1,1205 @@
+{
+	"info": {
+		"_postman_id": "3b26a118-38fa-471a-955e-b5e949c8f606",
+		"name": "Job Board Platform",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "39570890"
+	},
+	"item": [
+		{
+			"name": "Register",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"username\": \"TooR\",\r\n  \"email\": \"kibet.evans95@gmail.com\",\r\n  \"first_name\": \"Denis\",\r\n  \"last_name\": \"Kiprotich\",\r\n  \"password\": \"TooR*#\",\r\n  \"role\": \"recruiter\"\r\n}\r\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8000/api/register/",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"api",
+						"register",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Login",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"username\": \"Tooj\",\r\n  \"password\": \"Tooj*#\"\r\n}\r\n\r\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8000/api/token/",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"api",
+						"token",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Refresh",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzU4NTAyNjY2LCJpYXQiOjE3NTg0OTkwNjYsImp0aSI6IjVmMjVhZWIxNzcxZTQ0N2I5OGY4MThjMWViNWVlZGU2IiwidXNlcl9pZCI6ImZhNGVhOTljLWEyMTctNDFmMS05MDkzLWE2MWM3MzQzZGViZSJ9.in463mEZjbJI7J_0bY49Mw5yPDdw-cTk7PD5QIfwuYQ",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"refresh\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoicmVmcmVzaCIsImV4cCI6MTc1ODU4NTQ2NiwiaWF0IjoxNzU4NDk5MDY2LCJqdGkiOiJkMWFiZmM1MWEzYTc0OTliOGI0YTc4NWQ2ZDRmNWY1MCIsInVzZXJfaWQiOiJmYTRlYTk5Yy1hMjE3LTQxZjEtOTA5My1hNjFjNzM0M2RlYmUifQ.ZtKxTl6Zh20IwqF_DKn232nHvOZ0EDFB90wJXXkgwfQ\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8000/api/token/refresh/",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"api",
+						"token",
+						"refresh",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Logout",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzU4NTAyMzU3LCJpYXQiOjE3NTg0OTg3NTcsImp0aSI6ImViM2I1ZGZkNWY4MzQ3MGI5ZDgzMWQ4MmMzYmQwODU5IiwidXNlcl9pZCI6ImZhNGVhOTljLWEyMTctNDFmMS05MDkzLWE2MWM3MzQzZGViZSJ9.DsmJlQ5HXB-kFlPNsrulRkrHOvRJEAN__ehjirxcoTM",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"refresh\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoicmVmcmVzaCIsImV4cCI6MTc1ODU4NTE1NywiaWF0IjoxNzU4NDk4NzU3LCJqdGkiOiJjNmQ4ZDA4YTU5NzY0ZTEwYTVmZWFjMjFiMDNiOTI3ZSIsInVzZXJfaWQiOiJmYTRlYTk5Yy1hMjE3LTQxZjEtOTA5My1hNjFjNzM0M2RlYmUifQ.0RIGQ9AECwnDcNZwrRyVVnydRgbhUb72uJ3oP0bce6Y\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8000/api/token/logout/",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"api",
+						"token",
+						"logout",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "users",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzU4MDQ0NDU5LCJpYXQiOjE3NTgwNDA4NTksImp0aSI6IjJhYzMwODM2YWU0MjRlYTNhZjE1YzRjYzFhY2EyZjI3IiwidXNlcl9pZCI6Ijc5YjQzNzQ1LWM4ZmYtNGRmZS1iYjRhLThmM2ExZjU2NjIyOSJ9.ZV0N-g0SgwgQBMzmfFfzE6sHF2NYqKDWcLg58ULhw8E",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://127.0.0.1:8000/api/users/",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"api",
+						"users",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Profile",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzU4NTA2MzM3LCJpYXQiOjE3NTg1MDI3MzcsImp0aSI6IjZiNWRmYmQ5YTAyOTQ5ZTI4MjQ3Njc1ZmViMjg3NjM1IiwidXNlcl9pZCI6ImM3YzY1YWFkLWYwNTAtNGUyYi1iYzc0LWMzYzY4ZTkxNTczMyJ9.wYsff-Db96QnF86tnbM7lz7DB1QCAxLwf5PNs6bf-DI",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://127.0.0.1:8000/api/profiles/",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"api",
+						"profiles",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Profile",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzU4NTA2NDA4LCJpYXQiOjE3NTg1MDI4MDgsImp0aSI6IjdlNTljZWExMmU5YTRmZTdhZjEwOTk1M2Y3MGYyODdhIiwidXNlcl9pZCI6IjM4MjlkOGZhLTk3ZjMtNDQwMy1iNWZhLTNhNTBjNzc2OGEzNiJ9.6SfoJu1GZr9rjHIfH4DGMaFlNZaw1QRN56cBc8059VI",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://127.0.0.1:8000/api/profiles/",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"api",
+						"profiles",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "user",
+			"request": {
+				"method": "PATCH",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzU4MDQ0NDU5LCJpYXQiOjE3NTgwNDA4NTksImp0aSI6IjJhYzMwODM2YWU0MjRlYTNhZjE1YzRjYzFhY2EyZjI3IiwidXNlcl9pZCI6Ijc5YjQzNzQ1LWM4ZmYtNGRmZS1iYjRhLThmM2ExZjU2NjIyOSJ9.ZV0N-g0SgwgQBMzmfFfzE6sHF2NYqKDWcLg58ULhw8E",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"role\": \"recruiter\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8000/api/users/2f5aacc1-316e-4956-a6f2-6e4bcc037c64/",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"api",
+						"users",
+						"2f5aacc1-316e-4956-a6f2-6e4bcc037c64",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Categories",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzU4MjgzNTA1LCJpYXQiOjE3NTgyNzk5MDUsImp0aSI6IjNmYThhZTIxYzhmNDQyNzc5MWRlZDhmNmFjYzJiNThhIiwidXNlcl9pZCI6IjVmZTVhOGQyLWYwZmYtNGUxZS04MWY2LTBiMTk5ZThhM2Q3YSJ9.ULCgAkXv_BdvJcpjiBFV9_RE6pDWAgeA4LLOf7pUrQk",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"name\": \"Software Engineering\",\r\n  \"description\": \"Jobs related to software development.\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8000/api/categories/",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"api",
+						"categories",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Categories",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzU4MDMxNTg0LCJpYXQiOjE3NTgwMjc5ODQsImp0aSI6ImZlY2NkMDBjYTMxNjQ4ODBhN2UzMDkyZmI3OTMwMzdkIiwidXNlcl9pZCI6IjAwZmVmNzM2LTc2NzUtNDA5Zi05MDAzLTdmNWMzZmViODZkMCJ9.3hCmd9HjL28GoHmKdy-sjinb4Lbt2mLWSBN4Vu_JGBU",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8000/api/categories/",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"api",
+						"categories",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Company",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzU3NjEzNzUzLCJpYXQiOjE3NTc2MTAxNTMsImp0aSI6IjM0MDNmMDAxYjVlMzQ5ZTdiNjEyYmYzMDczZWJjMDg1IiwidXNlcl9pZCI6Ijk5OWVlN2YyLTVmNzMtNGM5Mi04NmY1LWM2NWFjZTVlMGIxYSJ9.JQJR2y1JJLPLxGh1ZYNMJLAE38iPG0D8HZ28G1iyRB4",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"name\": \"RomaxCorp\",\r\n  \"email\": \"kibet.evans95@gmail.com\",\r\n  \"location\": \"Nairobi, Kenya\",\r\n  \"industry\": \"Software\"\r\n}\r\n\r\n\r\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8000/api/companies/",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"api",
+						"companies",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Companies",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzU4NTA2NDA4LCJpYXQiOjE3NTg1MDI4MDgsImp0aSI6IjdlNTljZWExMmU5YTRmZTdhZjEwOTk1M2Y3MGYyODdhIiwidXNlcl9pZCI6IjM4MjlkOGZhLTk3ZjMtNDQwMy1iNWZhLTNhNTBjNzc2OGEzNiJ9.6SfoJu1GZr9rjHIfH4DGMaFlNZaw1QRN56cBc8059VI",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8000/api/companies/",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"api",
+						"companies",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Company Job",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzU4MDQ1NDA2LCJpYXQiOjE3NTgwNDE4MDYsImp0aSI6ImE4OGIwMzg3Njg3NjQzN2Q5NGZmOTU1NGIzNWEwYWI3IiwidXNlcl9pZCI6ImVlMzQxZTk1LTg1YWQtNGJiNy05MzAzLTNmMjhlYTY1NWY0YyJ9.98g72PQZMTJfOPKVZOV6h8U3O-0-mFEwlCEBq9Zefi4",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"title\": \"Frontend Developer\",\r\n  \"description\": \"Work on scalable APIs using Django REST Framework.\",\r\n  \"category\": 2,\r\n  \"salary\": \"150000.00\",\r\n  \"deadline\": \"2025-12-31T23:59:59Z\",\r\n  \"employment_type\": \"full_time\"\r\n}\r\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8000/api/companies/2/jobs/",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"api",
+						"companies",
+						"2",
+						"jobs",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Company Jobs",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzU3NjcyNzQxLCJpYXQiOjE3NTc2NjkxNDEsImp0aSI6IjFmY2M2ZjAwNzc3NTQ4OGQ4ZDJmZDNlYjk2ZDZmNmJkIiwidXNlcl9pZCI6IjRlYmQyMjQzLTI4NGItNDcxYy05MzZmLWYwZGQ2YjRlYzJkYiJ9.xmh7KPeqR_4HapOiGqwwLL4aM2HfthMm44y2-3g6VQo",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8000/api/companies/3/jobs/",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"api",
+						"companies",
+						"3",
+						"jobs",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Jobs",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "",
+						"value": "",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8000/api/jobs/",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"api",
+						"jobs",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Job Application",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzU3Nzc5MzgyLCJpYXQiOjE3NTc3NzU3ODIsImp0aSI6IjFhYzdlZjVjODUzYjQ5MmViNTk2ZWI2MTg5MTE4YWZlIiwidXNlcl9pZCI6IjM5ZWExN2MzLWQ1N2UtNDk4ZC1iMmI3LTcyMWM5YzIzZDYyMiJ9.zxuaI7Z4uZ20hOQbm4Ube-L6_ixGqpMg4qmNTbAV-xk",
+						"type": "text"
+					},
+					{
+						"key": "",
+						"value": "",
+						"type": "text",
+						"disabled": true
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "// curl -X POST \"http://127.0.0.1:8000/api/jobs/7/applications/\" -H \"Authorization: Bearer \" -F \"cover_letter=@C:\\Users\\admin\\Downloads\\job_board_psql_cheatsheet.pdf\" -F \"resume=@C:\\Users\\admin\\Downloads\\Denis_Kiprotich_Resume.pdf\"",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8000/api/jobs/7/applications/",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"api",
+						"jobs",
+						"7",
+						"applications",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "User Applications",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzU4MzA5NzM0LCJpYXQiOjE3NTgzMDYxMzQsImp0aSI6IjJmZTY0ZjIzYmY5ZDQ4OWY4NzMwMjI5ODQwYzk0N2EwIiwidXNlcl9pZCI6IjVmZTVhOGQyLWYwZmYtNGUxZS04MWY2LTBiMTk5ZThhM2Q3YSJ9.t_OUdqVdmk2hg-Tp8b6xghgADcNKCqVDXli1ytj6oj8",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://127.0.0.1:8000/api/users/3a3618da-36cc-441e-af87-78323f134793/applications/",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"api",
+						"users",
+						"3a3618da-36cc-441e-af87-78323f134793",
+						"applications",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "User Application",
+			"request": {
+				"method": "PATCH",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://127.0.0.1:8000/api/users/39ea17c3-d57e-498d-b2b7-721c9c23d622/applications/1/",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"api",
+						"users",
+						"39ea17c3-d57e-498d-b2b7-721c9c23d622",
+						"applications",
+						"1",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Reviews",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzU4Mjk3OTEwLCJpYXQiOjE3NTgyOTQzMTAsImp0aSI6IjRiYWRhMzkwNTc3ZjRiYjhiMDExMzBhMmVlM2NkYjMzIiwidXNlcl9pZCI6IjFkMGRiNjIzLTdmMDYtNDNlZi1iZTdhLWYwNjFjNjJhNWU1OCJ9.MngMb9fc7g_sxojG1B4FbOSeh4ZuXIQ8upb0HF1CWA0",
+						"type": "text"
+					},
+					{
+						"key": "",
+						"value": "",
+						"type": "text",
+						"disabled": true
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"rating\": 5,\r\n    \"comment\": \"Nice company\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8000/api/companies/3/reviews/",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"api",
+						"companies",
+						"3",
+						"reviews",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Companies Reviews",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "",
+						"value": "",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8000/api/companies/1/reviews/",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"api",
+						"companies",
+						"1",
+						"reviews",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Companies Notifications",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzU4MzE2MzQ3LCJpYXQiOjE3NTgzMTI3NDcsImp0aSI6ImUwODc3YmNmMmU5ZTQxZGRhMGExN2EzMWJhMzUwZjFiIiwidXNlcl9pZCI6IjM4MjlkOGZhLTk3ZjMtNDQwMy1iNWZhLTNhNTBjNzc2OGEzNiJ9.QzIyI8je9p8rhOaFP1rFzBGb7ajTTpL-q2vwok7C10k",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8000/api/companies/1/notifications/",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"api",
+						"companies",
+						"1",
+						"notifications",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Companies Notifications mark_as_read",
+			"request": {
+				"method": "PATCH",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzU4Mjk5ODQ0LCJpYXQiOjE3NTgyOTYyNDQsImp0aSI6ImU5NDNjZjEwMjM4YzRhOWZhNjlkOTllOWRjZGQ2N2ZhIiwidXNlcl9pZCI6ImZhNGVhOTljLWEyMTctNDFmMS05MDkzLWE2MWM3MzQzZGViZSJ9.ZsiEqsPMFvLK5SG4GVvlLbL6gUz43Tj5layudRHDiaM",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8000/api/companies/1/notifications/1/mark-as-read/",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"api",
+						"companies",
+						"1",
+						"notifications",
+						"1",
+						"mark-as-read",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Company Job Applications",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzU4MzAwMjE0LCJpYXQiOjE3NTgyOTY2MTQsImp0aSI6IjA1ZDFlNmMzOWY5MTQwNjRiMWRkNmZjZGE2MzgxZTY1IiwidXNlcl9pZCI6IjFkMGRiNjIzLTdmMDYtNDNlZi1iZTdhLWYwNjFjNjJhNWU1OCJ9.XPZcqY0NqE7Li6OHr02mLbkGyui_ZZ5nu5IAiu--rkg",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "\r\n\r\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8000/api/companies/3/jobs/1/applications/",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"api",
+						"companies",
+						"3",
+						"jobs",
+						"1",
+						"applications",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Company Job Application",
+			"request": {
+				"method": "PATCH",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzU3NjE1NTU0LCJpYXQiOjE3NTc2MTE5NTQsImp0aSI6ImIwNGI5M2I3OTdiNzRlYTViNTA1YmZhNTRkZjA5YTI2IiwidXNlcl9pZCI6Ijk5OWVlN2YyLTVmNzMtNGM5Mi04NmY1LWM2NWFjZTVlMGIxYSJ9.fRO2B_pZ-dVxk4nx8q5HA6Wi4RQPlL4TCh9Cmyii9tE",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"status\": \"accepted\"\r\n}\r\n\r\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8000/api/companies/3/jobs/7/applications/3/",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"api",
+						"companies",
+						"3",
+						"jobs",
+						"7",
+						"applications",
+						"3",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Comp Job App res&cov filter",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzU4MDMxMTIyLCJpYXQiOjE3NTgwMjc1MjIsImp0aSI6ImNhNzhmMGU5ZTZiMTQ2OTNhMGFmZTkzNTkyNGFlNGY0IiwidXNlcl9pZCI6ImFiZjQyYzdmLTFhZGUtNDZlMS1iZmU2LWZiMjc4MDQyNzAyNiJ9.awMvakZDQ2AvQYt38RQh013sECBbc8gtD6EuwtaAWZw",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "\r\n\r\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8000/api/companies/2/jobs/3/applications/?resume=true&cover_letter=true",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"api",
+						"companies",
+						"2",
+						"jobs",
+						"3",
+						"applications",
+						""
+					],
+					"query": [
+						{
+							"key": "resume",
+							"value": "true"
+						},
+						{
+							"key": "cover_letter",
+							"value": "true"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Jobs pages",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzU3OTAwODkxLCJpYXQiOjE3NTc4OTcyOTIsImp0aSI6ImM2ZmZmNjhlMmZlOTQ3ZmRiZmE5Y2I2NTllNDEwZTQ0IiwidXNlcl9pZCI6IjNhMzYxOGRhLTM2Y2MtNDQxZS1hZjg3LTc4MzIzZjEzNDc5MyJ9.UAASHOvbdfLtZstOh_UeR2OxEbM-QK8UBomWttMIAhc",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8000/api/jobs/?page=3",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"api",
+						"jobs",
+						""
+					],
+					"query": [
+						{
+							"key": "page",
+							"value": "3"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Jobs Filter by employment_type",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "",
+						"value": "",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8000/api/jobs/?employment_type=part_time",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"api",
+						"jobs",
+						""
+					],
+					"query": [
+						{
+							"key": "employment_type",
+							"value": "part_time"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Jobs Filter by deadline",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzU3ODQyODM1LCJpYXQiOjE3NTc4MzkyMzUsImp0aSI6Ijc4MDI2ODE5ZTg1MjQzZmI5NzhhYjdmMWU3MjIwZTZkIiwidXNlcl9pZCI6IjNhMzYxOGRhLTM2Y2MtNDQxZS1hZjg3LTc4MzIzZjEzNDc5MyJ9.QMbVnBRCoYVKhYo14usf7Py_-YVN5R-u6ma9rkVJEYk",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8000/api/jobs/?deadline=true",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"api",
+						"jobs",
+						""
+					],
+					"query": [
+						{
+							"key": "deadline",
+							"value": "true"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Application search",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzU4MDMyNTE4LCJpYXQiOjE3NTgwMjg5MTgsImp0aSI6IjUxYTY1Nzc3ZmJkYjRkYjZhOTliNTc0YzFiZGY1YmJhIiwidXNlcl9pZCI6IjAwZmVmNzM2LTc2NzUtNDA5Zi05MDAzLTdmNWMzZmViODZkMCJ9._EABjmOJQPggA_ub7kzp-6StOIjkocd4ThrAbfCFm3E",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8000/api/users/00fef736-7675-409f-9003-7f5c3feb86d0/applications/?search=Backend",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"api",
+						"users",
+						"00fef736-7675-409f-9003-7f5c3feb86d0",
+						"applications",
+						""
+					],
+					"query": [
+						{
+							"key": "search",
+							"value": "Backend"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
