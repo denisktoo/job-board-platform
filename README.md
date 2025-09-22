@@ -6,6 +6,7 @@ A RESTful Job Board API built with **Django REST Framework**, featuring:
 * **Role-based access (User, Recruiter, Admin)**
 * **Company & Job management**
 * **Applications with file uploads**
+* **Profile management (User/Admin only)**
 * **Search & filtering with pagination**
 * **Email notifications with Celery**
 * **Automated scheduling with Celery Beat**
@@ -85,10 +86,81 @@ Production deployment available here: **[Job Board Platform on Render](https://j
 }
 ```
 
-All protected endpoints require:
+### Logout
 
+**POST** `/api/logout/`
+
+Request:
+
+```json
+{
+  "refresh": "eyJhbGciOiJIUzI1NiIsInR..."
+}
 ```
-Authorization: Bearer <access_token>
+
+Response:
+
+```json
+{
+  "message": "Logout successful"
+}
+```
+
+---
+
+## 🏠 Home API Status
+
+### Project Root (`/`)
+
+**GET** `/`
+
+Returns a simple JSON status confirming the API is live:
+
+```json
+{
+  "message": "Job Board API is live 🚀",
+  "docs": "/api/docs/",
+  "api_base": "/api/"
+}
+```
+
+---
+
+### API Root (`/api/`)
+
+**GET** `/api/`
+
+Returns the DRF API root with resource links:
+
+```json
+{
+  "users": "http://127.0.0.1:8000/api/users/",
+  "companies": "http://127.0.0.1:8000/api/companies/",
+  "jobs": "http://127.0.0.1:8000/api/jobs/",
+  "profiles": "http://127.0.0.1:8000/api/profiles/",
+  "categories": "http://127.0.0.1:8000/api/categories/"
+}
+```
+
+---
+
+## 👤 Profile Management (User/Admin)
+
+* **Create or Update Profile (User/Admin)** → `POST /api/profile/` or `PATCH /api/profile/{profile_id}/`
+* **View Profile (User/Admin)** → `GET /api/profile/{profile_id}/`
+
+Example request:
+
+```json
+{
+  "bio": "Passionate full-stack developer with focus on Django and React.",
+  "location": "Nairobi, Kenya",
+  "skills": "Python, Django, DRF, React, PostgreSQL, Celery",
+  "experience": "2 years freelance web development",
+  "linkedin_url": "https://www.linkedin.com/in/deniskiprotich",
+  "github_url": "https://github.com/deniskiprotich",
+  "portfolio_url": "https://deniskiprotich.dev"
+}
 ```
 
 ---
@@ -163,7 +235,7 @@ curl -X POST "http://127.0.0.1:8000/api/jobs/7/applications/" \
 
 | Role          | Permissions                                                            |
 | ------------- | ---------------------------------------------------------------------- |
-| **User**      | Apply to jobs, view & update own applications, update own profile      |
+| **User**      | Apply to jobs, manage own profile, view & update own applications      |
 | **Recruiter** | Create companies, post jobs, view & manage applications for their jobs |
 | **Admin**     | Full access: manage users, companies, jobs, categories, applications   |
 
@@ -218,7 +290,8 @@ Example paginated response:
 2. Register as a **User** → apply for jobs
 3. Use JWT tokens in request headers
 4. Explore job postings, apply, and manage applications
-5. Check `requests.log` for API request history
+5. Create and update your profile
+6. Check `requests.log` for API request history
 
 For testing, import the provided **Postman collection**.
 
