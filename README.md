@@ -1,7 +1,3 @@
-Below is the **complete, updated README.md** that includes the **Company Review** endpoints and all the changes we discussed (logout, home vs api root, profile access rules, Celery worker/beat split, notifications via signals, CI/CD & Render notes, recent commits, Postman collection note, etc.). Copy this into your `README.md`.
-
----
-
 # 💼 Job Board Platform API
 
 A RESTful Job Board API built with **Django REST Framework**, featuring:
