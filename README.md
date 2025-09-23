@@ -112,7 +112,7 @@ Response:
 }
 ```
 
-> Notes: logout requires `rest_framework_simplejwt.token_blacklist` enabled in `INSTALLED_APPS` and `migrate` run. The endpoint blacklists the refresh token so it cannot obtain new access tokens.
+<!-- > Notes: logout requires `rest_framework_simplejwt.token_blacklist` enabled in `INSTALLED_APPS` and `migrate` run. The endpoint blacklists the refresh token so it cannot obtain new access tokens. -->
 
 All protected endpoints require the header:
 
@@ -357,7 +357,7 @@ If Swagger UI looks broken (missing CSS/JS), ensure:
 5. Create and update your profile (User/Admin)
 6. Check `requests.log` for API request history
 
-For testing, import the included **Postman collection** (`Job Board Platform.postman_collection.json`) into Postman.
+For testing, import the included **Postman collection** into Postman.
 
 ---
 
