@@ -371,6 +371,13 @@ Example paginated response:
 * Deactivates jobs automatically after deadline
 * Sends application reminders 5 days before job deadline
 
+### ✅ RabbitMQ (Message Broker)
+
+* Acts as the **message broker** for Celery, handling communication between Django and background workers.
+* Ensures tasks (like sending emails or scheduling reminders) are queued and processed reliably.
+* Uses **RPC** as the result backend to track task results.
+* Configured to serialize all tasks and results in **JSON** for consistency.
+
 ### ✅ Signals
 
 * Creating a `CompanyReview` triggers a `Notification` via `post_save` signal.
