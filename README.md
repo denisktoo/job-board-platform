@@ -197,8 +197,30 @@ curl -X PATCH "http://127.0.0.1:8000/api/users/{user_id}/applications/{applicati
 ## 🏢 Company Management
 
 * **Create Company (Recruiter/Admin)** → `POST /api/companies/`
+  Request example:
+
+  ```json
+  {
+    "name": "Leizam Ventures",
+    "location": "Nairobi, Kenya",
+    "industry": "Software Development",
+    "website": "https://leizamventures.com",
+    "description": "A growing tech company building scalable digital solutions."
+  }
+  ```
+
 * **List Companies (Public)** → `GET /api/companies/`
 * **Create Job under a Company (Recruiter/Admin)** → `POST /api/companies/{company_id}/jobs/`
+  ```json
+  {
+    "title": "Backend Developer",
+    "description": "Work on scalable APIs using Django REST Framework.",
+    "category": 2,
+    "salary": "150000.00",
+    "deadline": "2025-12-31T23:59:59Z",
+    "employment_type": "full_time"
+  }
+  ```
 * **List Jobs for a Company (Public)** → `GET /api/companies/{company_id}/jobs/`
 * **View Applications for a Job (Recruiter/Admin)** → `GET /api/companies/{company_id}/jobs/{job_id}/applications/`
 * **Filter Applications (Recruiter/Admin)** → `GET /api/companies/{company_id}/jobs/{job_id}/applications/?resume=true&cover_letter=true`
@@ -211,14 +233,20 @@ curl -X PATCH "http://127.0.0.1:8000/api/users/{user_id}/applications/{applicati
 **Company Review Endpoints**
 
 * **Create Review (authenticated user)** → `POST /api/companies/{company_id}/reviews/`
-  Request example:
+**Request Headers:**
 
-  ```json
-  {
-    "rating": 5,
-    "comment": "Great interview process and supportive team."
-  }
-  ```
+```
+Authorization: Bearer <access_token>
+```
+
+Request example:
+
+```json
+{
+  "rating": 5,
+  "comment": "Great interview process and supportive team."
+}
+```
 * **List Reviews for Company (public)** → `GET /api/companies/{company_id}/reviews/`
 * **Get Review (public)** → `GET /api/companies/{company_id}/reviews/{review_id}/`
 
@@ -253,7 +281,22 @@ Authorization: Bearer <access_token>
 ## 📂 Categories
 
 * **Create Category (Admin only)** → `POST /api/categories/`
-* **List Categories (Public)** → `GET /api/categories/`
+**Request Headers:**
+
+```
+Authorization: Bearer <access_token>
+```
+
+Request Example:
+
+```json
+{
+  "name": "Software Engineering",
+  "description": "Jobs related to software development."
+}
+```
+
+* **List Categories (Authenticated users only)** → `GET /api/categories/`
 * **Update Category (Admin only)** → `PATCH /api/categories/{category_id}/`
 
 ---
@@ -265,7 +308,8 @@ Authorization: Bearer <access_token>
 * **Filter & Search Jobs** →
 
   * By employment type: `/api/jobs/?employment_type=full_time`
-  * By deadline: `/api/jobs/?deadline=2025-12-31`
+  * By deadline: `/api/jobs/?deadline=true`
+   > `deadline=true` → returns active jobs (future deadline)
   * Search (title/company/location): `/api/jobs/?search=Engineer`
 
 ---
