@@ -31,6 +31,8 @@ from rest_framework.response import Response
 from django.http import JsonResponse
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page
 
 class UserViewSets(viewsets.ModelViewSet):
     queryset = User.objects.all()
@@ -92,6 +94,8 @@ class CategoryViewSets(viewsets.ModelViewSet):
     serializer_class = CategorySerializer
     permission_classes = [IsAdminUser]
 
+@method_decorator(cache_page(60 * 15), name="list")
+@method_decorator(cache_page(60 * 15), name="retrieve")
 class PublicJobViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Job.objects.all()
     serializer_class = JobSerializer

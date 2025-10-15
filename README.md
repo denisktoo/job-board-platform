@@ -12,6 +12,7 @@ A RESTful Job Board API built with **Django REST Framework**, featuring:
 * **Automated scheduling with Celery Beat**
 * **Signals for real-time notifications (reviews → notifications)**
 * **Custom middleware for request logging**
+* **Dockerized setup with Postgres, Redis, RabbitMQ, Celery, and Celery Beat**
 
 ---
 
@@ -24,6 +25,34 @@ Here’s the ERD for the project:
 ---
 
 ## ⚙️ Setup (local)
+
+You can now run the entire stack — including **PostgreSQL**, **Redis**, **RabbitMQ**, **Celery**, and **Django** — using Docker.
+
+### 🐳 Using Docker Compose
+
+```bash
+docker-compose up --build
+```
+
+This command:
+
+* Builds your Docker images (based on your `Dockerfile`)
+* Starts containers for:
+
+  * PostgreSQL (Database)
+  * Redis (Cache & Celery result backend)
+  * RabbitMQ (Celery broker)
+  * Django (web app using Gunicorn)
+  * Celery worker
+  * Celery Beat scheduler
+
+Once everything is running:
+
+* Django: `http://localhost:8000`
+* RabbitMQ Dashboard: `http://localhost:15672` (user: `guest`, pass: `guest`)
+* PostgreSQL, Redis, and Celery connect automatically via Docker network aliases.
+
+### 🧩 Local Manual Setup (without Docker)
 
 ```bash
 pip install -r requirements.txt
@@ -46,6 +75,39 @@ celery -A job_board_platform beat --loglevel=info
 The API will be available at `http://127.0.0.1:8000/`
 
 Production deployment available here: **[Job Board Platform on Render](https://job-board-platform-fcav.onrender.com/)**
+
+---
+
+## 🧰 Redis, Celery & RabbitMQ Configuration
+
+The project integrates **Celery**, **Redis**, and **RabbitMQ** through the following configuration:
+
+* **Celery Broker:** RabbitMQ (`amqp://guest:guest@rabbitmq:5672//`)
+* **Celery Result Backend:** Redis (`redis://redis:6379/0`)
+* **Django Cache:** Redis (`redis://redis:6379/1`)
+* **Serialization:** JSON for both tasks and results
+* **Timezone:** UTC
+
+This setup ensures efficient message passing between Django, Celery workers, and scheduled tasks.
+
+Your `Dockerfile` runs Django using:
+
+```
+CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+```
+
+(suitable for local development)
+
+While in **Render**, deployment uses Gunicorn:
+
+```
+startCommand: gunicorn job_board_platform.wsgi:application --bind 0.0.0.0:$PORT
+```
+
+This distinction allows:
+
+* **Docker** → quick local development
+* **Render** → production with optimized server handling
 
 ---
 
@@ -365,6 +427,8 @@ Example paginated response:
   * Company registration confirmation
   * Job registration confirmation
   * Job application confirmation
+* Uses **RabbitMQ** as the message broker (`CELERY_BROKER_URL = 'amqp://guest:guest@rabbitmq:5672//'`)
+* Uses **Redis** as the result backend (`CELERY_RESULT_BACKEND = 'redis://redis:6379/0'`)
 
 ### ✅ Celery Beat (Scheduled Tasks)
 
@@ -373,10 +437,16 @@ Example paginated response:
 
 ### ✅ RabbitMQ (Message Broker)
 
-* Acts as the **message broker** for Celery, handling communication between Django and background workers.
-* Ensures tasks (like sending emails or scheduling reminders) are queued and processed reliably.
-* Uses **RPC** as the result backend to track task results.
-* Configured to serialize all tasks and results in **JSON** for consistency.
+* Acts as the **Celery broker**, enabling task queueing and communication between Django and workers.
+* Accessible locally on port `5672`, management UI at `15672`.
+
+### ✅ Redis
+
+* Serves dual roles:
+
+  * **Cache backend** (`CACHES["default"]`)
+  * **Celery result backend**
+* Runs in its own Docker container and connects via `redis://redis:6379`.
 
 ### ✅ Signals
 
@@ -395,20 +465,33 @@ If Swagger UI looks broken (missing CSS/JS), ensure:
 
 1. `drf_yasg` is installed and in `INSTALLED_APPS`.
 2. Run `python manage.py collectstatic`.
-3. In production, use WhiteNoise or proper static serving (Render: `collectstatic` runs during build if configured).
+3. For production (`DEBUG=False`), static files are served using:
+
+   ```python
+   STATIC_URL = "/static/"
+   STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
+
+   if not DEBUG:
+       STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+   ```
+
+   This works for both local (`DEBUG=True`) and Render (`DEBUG=False`) environments.
 
 ---
 
 ## 🚀 Getting Started / Workflow
 
-1. Register as a **Recruiter** → create companies & jobs
-2. Register as a **User** → apply for jobs
-3. Use JWT tokens in request headers
-4. Explore job postings, apply, and manage applications
-5. Create and update your profile (User/Admin)
-6. Check `requests.log` for API request history
+1. Start containers:
 
-For testing, import the included **Postman collection** into Postman.
+   ```bash
+   docker-compose up --build
+   ```
+2. Register as a **Recruiter** → create companies & jobs
+3. Register as a **User** → apply for jobs
+4. Use JWT tokens in request headers
+5. Explore job postings, apply, and manage applications
+6. Check `requests.log` for API request history
+7. View background task execution in Celery logs
 
 ---
 
@@ -419,6 +502,9 @@ This project is deployed on **Render Free Tier** with CI/CD powered by **GitHub 
 * `render.yaml` defines the web service and free PostgreSQL database.
 * `.github/workflows/ci.yml` runs tests on pushes and PRs.
 * `.github/workflows/dep.yml` triggers Render deploys for `main`.
+
+**Local Development:** uses **Docker Compose** for complete stack orchestration.
+**Production:** Render runs Django using **Gunicorn** and manages Postgres automatically.
 
 **Secrets**: `RENDER_API_KEY` and `RENDER_SERVICE_ID` are stored in GitHub Secrets. Other sensitive values (`SECRET_KEY`, DB creds, email config) live in `.env` locally and in Render Dashboard for production — never hardcoded.
 

@@ -96,8 +96,9 @@ INSTALLED_APPS = [
 ]
 
 # Celery Configuration
-CELERY_BROKER_URL = 'amqp://guest:guest@localhost:5672//'  # RabbitMQ default port
-CELERY_RESULT_BACKEND = 'rpc://'  # Using RPC backend with RabbitMQ
+CELERY_BROKER_URL = 'amqp://guest:guest@rabbitmq:5672//'  # RabbitMQ default port
+# CELERY_RESULT_BACKEND = 'rpc://'  # Using RPC backend with RabbitMQ
+CELERY_RESULT_BACKEND = 'redis://redis:6379/0' # Celery result backend (Redis)
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
@@ -112,6 +113,17 @@ CELERY_BEAT_SCHEDULE = {
         'task': 'job_board.tasks.send_deadline_reminders',
         'schedule': crontab(hour=9, minute=0),
     },
+}
+
+# Django cache using Redis
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": "redis://redis:6379/1",
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient"
+        },
+    }
 }
 
 MIDDLEWARE = [
@@ -193,9 +205,9 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = "/static/"
+STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
 
 if not DEBUG:
-    STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
     STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 # Default primary key field type
