@@ -20,7 +20,7 @@ A RESTful Job Board API built with **Django REST Framework**, featuring:
 
 Here’s the ERD for the project:
 
-![Job Board ERD](https://drive.google.com/uc?export=view\&id=1x8y6ffKxhzfraZvwiieiCx8odegva9jx)
+![Job Board ERD](https://drive.google.com/uc?export=view\&id=1C7ibNYvXu9B90Wuc6AkcOtGhLH5Bfx_s)
 
 ---
 
