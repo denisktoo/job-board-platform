@@ -126,6 +126,15 @@ class JobViewSets(viewsets.ModelViewSet):
 
         if not company_pk:
             raise ValidationError("Jobs must be created under a company.")
+        
+        # Get the company and ensure the current user is the owner
+        try:
+            company = Company.objects.filter(company_id=company_pk)
+        except Company.DoesNotExist:
+            raise ValidationError("Company Not Found.")
+        
+        if company.user != self.request.user:
+            raise PermissionDenied("You are not authorized to post jobs for this company.")
 
         job = serializer.save(company_id=company_pk)
 
