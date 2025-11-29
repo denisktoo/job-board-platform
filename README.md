@@ -31,7 +31,7 @@ You can now run the entire stack — including **PostgreSQL**, **Redis**, **Rabb
 ### 🐳 Using Docker Compose
 
 ```bash
-docker-compose up --build
+docker compose up --build
 ```
 
 This command:
@@ -51,6 +51,22 @@ Once everything is running:
 * Django: `http://localhost:8000`
 * RabbitMQ Dashboard: `http://localhost:15672` (user: `guest`, pass: `guest`)
 * PostgreSQL, Redis, and Celery connect automatically via Docker network aliases.
+
+# 🚀 Running After the Initial Build
+
+After you have run the initial command successfully and the images have been built, you can use a simpler command for subsequent startups, provided you haven't changed the underlying Dockerfiles or source code that needs to be baked into a new image:
+
+```bash
+docker compose up
+```
+
+This subsequent command reuses the existing, built images, allowing your application stack to start up much faster.
+
+If you make changes to your application code and need those changes to be reflected in a running container, use the `--build` flag again:
+
+```bash
+docker compose up --build
+```
 
 ### 🧩 Local Manual Setup (without Docker)
 
