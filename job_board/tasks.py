@@ -66,7 +66,7 @@ def send_job_application_confirmation_email(email, applicant, title, name, statu
 def deactivate_expired_jobs():
     """Deactivate jobs whose deadline has passed"""
     today = timezone.now().date()
-    expired_jobs = Application.objects.filter(deadline__lt=today, is_active=True)
+    expired_jobs = Job.objects.filter(deadline__lt=today, is_active=True)
     count = expired_jobs.update(is_active=False)
     return f"Deactivated {count} expired jobs."
 

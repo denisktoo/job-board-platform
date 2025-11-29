@@ -56,7 +56,7 @@ services:
     volumes:
       - .:/app
     depends_on:
-      - db
+      # - db
       - redis
       - rabbitmq
     env_file:
