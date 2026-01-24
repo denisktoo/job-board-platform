@@ -71,7 +71,7 @@ def deactivate_expired_jobs():
     return f"Deactivated {count} expired jobs."
 
 @shared_task
-def send_application_reminders():
+def send_application_deadline_reminders():
     """Send reminder emails when it's exactly 5 days to the job deadline."""
     today = timezone.now().date()
     target_date = today + timedelta(days=5)

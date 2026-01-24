@@ -110,7 +110,7 @@ CELERY_BEAT_SCHEDULE = {
         'schedule': crontab(hour=0, minute=0),
     },
     'send-deadline-reminders-daily': {
-        'task': 'job_board.tasks.send_deadline_reminders',
+        'task': 'job_board.tasks.send_application_deadline_reminders',
         'schedule': crontab(hour=9, minute=0),
     },
 }
