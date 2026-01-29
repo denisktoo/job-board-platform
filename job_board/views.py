@@ -94,8 +94,8 @@ class CategoryViewSets(viewsets.ModelViewSet):
     serializer_class = CategorySerializer
     permission_classes = [IsAdminUser]
 
-@method_decorator(cache_page(60 * 15), name="list")
-@method_decorator(cache_page(60 * 15), name="retrieve")
+# @method_decorator(cache_page(60 * 15), name="list")
+# @method_decorator(cache_page(60 * 15), name="retrieve")
 class PublicJobViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Job.objects.all()
     serializer_class = JobSerializer
