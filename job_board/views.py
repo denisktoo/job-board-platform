@@ -129,7 +129,7 @@ class JobViewSets(viewsets.ModelViewSet):
         if not company_pk:
             raise ValidationError("Jobs must be created under a company.")
 
-        company = get_object_or_404(Company, id=company_pk)
+        company = get_object_or_404(Company, company_id=company_pk)
 
         if company.user != self.request.user:
             raise PermissionDenied("You are not authorized to post jobs for this company.")
