@@ -73,7 +73,7 @@ SECRET_KEY = env('SECRET_KEY')
 
 # ALLOWED_HOSTS = []
 
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ['*']
 
