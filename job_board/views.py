@@ -126,22 +126,17 @@ class JobViewSets(viewsets.ModelViewSet):
 
         if not company_pk:
             raise ValidationError("Jobs must be created under a company.")
-        
-        # Get the company and ensure the current user is the owner
-        try:
-            company = Company.objects.filter(company_id=company_pk)
-        except Company.DoesNotExist:
-            raise ValidationError("Company Not Found.")
-        
+
+        company = get_object_or_404(Company, id=company_pk)
+
         if company.user != self.request.user:
             raise PermissionDenied("You are not authorized to post jobs for this company.")
 
-        job = serializer.save(company_id=company_pk)
+        job = serializer.save(company=company)
 
-        # Call Celery task after saving
         send_job_registration_confirmation_email.delay(
-            job.company.user.email,
-            job.company.user.first_name,
+            company.user.email,
+            company.user.first_name,
             job.title,
             job.employment_type,
             job.created_at,
