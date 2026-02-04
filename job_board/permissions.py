@@ -130,3 +130,21 @@ class IsApplicantOrAdminUser(permissions.BasePermission):
                 return obj.user == request.user
 
         return False
+    
+class IsOwnerOrAdmin(permissions.BasePermission):
+    """
+    - Admin: full access
+    - Any authenticated user: can view/update ONLY their own profile
+    """
+
+    def has_permission(self, request, view):
+        # Must be authenticated
+        return request.user and request.user.is_authenticated
+
+    def has_object_permission(self, request, view, obj):
+        # Admin can access everything
+        if getattr(request.user, 'role', None) == 'admin':
+            return True
+
+        # Only allow users to access their own profile
+        return obj.user == request.user

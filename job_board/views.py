@@ -12,7 +12,8 @@ from .models import (
 )
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from .permissions import (
-    IsAdminUser, IsApplicantOrAdminUser, IsRecruiterOrAdminUser, IsApplicantOrAdmin
+    IsAdminUser, IsApplicantOrAdminUser, IsRecruiterOrAdminUser, IsApplicantOrAdmin,
+    IsOwnerOrAdmin
 )
 from rest_framework.exceptions import (
     MethodNotAllowed, ValidationError, NotFound, PermissionDenied
@@ -240,20 +241,24 @@ class LogoutView(APIView):
             return Response({"error": "Invalid token"}, status=status.HTTP_400_BAD_REQUEST)
 
 class ProfileViewSet(viewsets.ModelViewSet):
-    queryset = Profile.objects.all()
     serializer_class = ProfileSerializer
-    permission_classes = [IsApplicantOrAdmin]
+    permission_classes = [IsOwnerOrAdmin]
     filter_backends = [DjangoFilterBackend]
     filterset_class = ProfileFilter
 
     def get_queryset(self):
-        # Skip logic during Swagger schema generation
+        # Swagger compatibility
         if getattr(self, "swagger_fake_view", False):
-            return Company.objects.none()
-        
-        if getattr(self.request.user, 'role', None) == "admin":
+            return Profile.objects.none()
+
+        user = self.request.user
+
+        # Admin sees all profiles
+        if getattr(user, 'role', None) == 'admin':
             return Profile.objects.all()
-        return Profile.objects.filter(user=self.request.user)
+
+        # Everyone else sees ONLY their own profile
+        return Profile.objects.filter(user=user)
 
     def perform_create(self, serializer):
         # Ensure one profile per user
