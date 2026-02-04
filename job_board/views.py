@@ -74,9 +74,27 @@ class UserApplicationsViewSet(viewsets.ModelViewSet):
     #     raise MethodNotAllowed('DELETE')
 
 class CompanyViewSets(viewsets.ModelViewSet):
-    queryset = Company.objects.all()
+    # queryset = Company.objects.all()
     serializer_class = CompanySerializer
     permission_classes = [IsRecruiterOrAdminUser]
+
+    def get_queryset(self):
+        user = self.request.user
+
+        # Public users → can see all companies
+        if not user.is_authenticated:
+            return Company.objects.all()
+
+        # Admin → can see all companies
+        if user.role == "admin":
+            return Company.objects.all()
+
+        # Recruiter → can ONLY see their own companies
+        if user.role == "recruiter":
+            return Company.objects.filter(user=user)
+
+        # Others → default public view
+        return Company.objects.all()
 
     def perform_create(self, serializer):
         company = serializer.save(user=self.request.user)
