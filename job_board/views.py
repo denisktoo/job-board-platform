@@ -101,12 +101,12 @@ class CompanyViewSets(viewsets.ModelViewSet):
 
         # Call Celery task after saving
         # Only call Celery after DB commit
-        transaction.on_commit(lambda: send_company_registration_confirmation_email.delay(
-            company.email,
-            company.name,
-            company.location,
-            company.industry
-        ))
+        # transaction.on_commit(lambda: send_company_registration_confirmation_email.delay(
+        #     company.email,
+        #     company.name,
+        #     company.location,
+        #     company.industry
+        # ))
 
         return company
 
@@ -155,14 +155,14 @@ class JobViewSets(viewsets.ModelViewSet):
 
         job = serializer.save(company=company)
 
-        transaction.on_commit(lambda: send_job_registration_confirmation_email.delay(
-            company.user.email,
-            company.user.first_name,
-            job.title,
-            job.employment_type,
-            job.created_at,
-            job.deadline
-        ))
+        # transaction.on_commit(lambda: send_job_registration_confirmation_email.delay(
+        #     company.user.email,
+        #     company.user.first_name,
+        #     job.title,
+        #     job.employment_type,
+        #     job.created_at,
+        #     job.deadline
+        # ))
 
         return job
 
@@ -189,14 +189,14 @@ class JobApplicationViewSets(viewsets.ModelViewSet):
         application =  serializer.save(user=self.request.user, job_id=job_pk)
 
         # Call Celery task after saving
-        transaction.on_commit(lambda: send_job_application_confirmation_email.delay(
-            application.user.email,
-            application.user.first_name,
-            application.job.title,
-            application.job.company.name,
-            application.status,
-            application.applied_at
-        ))
+        # transaction.on_commit(lambda: send_job_application_confirmation_email.delay(
+        #     application.user.email,
+        #     application.user.first_name,
+        #     application.job.title,
+        #     application.job.company.name,
+        #     application.status,
+        #     application.applied_at
+        # ))
 
         return application
 
