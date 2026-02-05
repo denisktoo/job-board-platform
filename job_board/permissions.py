@@ -10,7 +10,7 @@ class IsAdminUser(permissions.BasePermission):
     def has_permission(self, request, view):
         # Allow SAFE methods for any authenticated user
         if request.method in permissions.SAFE_METHODS:
-            return request.user.is_authenticated
+            return True
 
         # Unsafe methods only allowed for admins
         return getattr(request.user, 'role', None) == 'admin'
