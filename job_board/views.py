@@ -284,6 +284,12 @@ class ProfileViewSet(viewsets.ModelViewSet):
             raise ValidationError("You already have a profile.")
         serializer.save(user=self.request.user)
 
+    @action(detail=False, methods=['get'])
+    def me(self, request):
+        profile = Profile.objects.get(user=request.user)
+        serializer = self.get_serializer(profile)
+        return Response(serializer.data)
+
 class CompanyReviewViewSet(viewsets.ModelViewSet):
     serializer_class = CompanyReviewSerializer
     filter_backends = [DjangoFilterBackend]
