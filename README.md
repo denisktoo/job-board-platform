@@ -244,7 +244,6 @@ DRF API root — returns links to top-level resources:
   "profiles": "http://127.0.0.1:8000/api/profiles/",
   "categories": "http://127.0.0.1:8000/api/categories/",
   "conversations": "http://127.0.0.1:8000/api/conversations/",
-  "messages": "http://127.0.0.1:8000/api/messages/",
   "notifications": "http://127.0.0.1:8000/api/notifications/"
 }
 ```
@@ -389,31 +388,30 @@ Authorization: Bearer <access_token>
 * **Filter Conversations by Participant (UUID)** → `GET /api/conversations/?participant={user_id}`
 * **Get One Conversation** → `GET /api/conversations/{conversation_id}/`
 
-* **Send Message** → `POST /api/messages/`
+* **Send Message** → `POST /api/conversations/{conversation_id}/messages/`
   *What it does:* Sends a message in a conversation.
-  *Required fields:* `conversation_id`, `content`
+  *Required fields:* `content`
   *Optional fields:* `receiver_id`, `parent_message_id` (for threaded replies)
 
-* **List My Messages** → `GET /api/messages/`
+* **List Messages in Conversation** → `GET /api/conversations/{conversation_id}/messages/`
   *What it does:* Returns messages from conversations where the logged-in user participates.
-* **Filter Messages** → `GET /api/messages/?conversation=2&sender={user_id}&read=false`
-* **Edit Own Message** → `PATCH /api/messages/{message_id}/`
+* **Filter Messages** → `GET /api/conversations/{conversation_id}/messages/?sender={user_id}&read=false`
+* **Edit Own Message** → `PATCH /api/conversations/{conversation_id}/messages/{message_id}/`
   *What it does:* Updates message content; old content is saved in `MessageHistory` and `edited=true` is set.
 
-* **Get Message Edit History** → `GET /api/messages/{message_id}/history/`
+* **Get Message Edit History** → `GET /api/conversations/{conversation_id}/messages/{message_id}/history/`
   *What it does:* Returns previous versions of that message.
-* **Get Threaded Replies** → `GET /api/messages/{message_id}/thread/`
+* **Get Threaded Replies** → `GET /api/conversations/{conversation_id}/messages/{message_id}/thread/`
   *What it does:* Returns recursive nested replies for that message.
 
-* **Unread Inbox (Custom Manager)** → `GET /api/messages/inbox/unread/`
-  *What it does:* Uses custom ORM manager to return unread messages for the current user only.
+* **Unread Messages in Conversation (Custom Manager)** → `GET /api/conversations/{conversation_id}/messages/inbox/unread/`
+  *What it does:* Uses custom ORM manager to return unread messages for the current user in the selected conversation.
   *Optimization:* Uses `.only()` and `select_related('sender')` for lightweight inbox queries.
 
 Message create example:
 
 ```json
 {
-  "conversation_id": 2,
   "receiver_id": "a8d06878-fbe4-433e-95ac-1a6c81173606",
   "content": "Hello, are you available for an interview this week?"
 }
@@ -423,7 +421,6 @@ Reply message example:
 
 ```json
 {
-  "conversation_id": 2,
   "parent_message_id": 15,
   "receiver_id": "b98f4506-096d-449a-98c7-dd0ba331f98a",
   "content": "Yes, Thursday works for me."
@@ -445,7 +442,7 @@ Reply message example:
 | `/api/profiles/` | `location`, `skills`, `experience` | `/api/profiles/?skills=django&location=nairobi` |
 | `/api/companies/{company_id}/reviews/` | `company`, `user`, `rating_min`, `rating_max` | `/api/companies/1/reviews/?rating_min=4` |
 | `/api/conversations/` | `participant` | `/api/conversations/?participant={user_id}` |
-| `/api/messages/` | `sender`, `receiver`, `conversation`, `read`, `search` | `/api/messages/?conversation=2&read=false` |
+| `/api/conversations/{conversation_id}/messages/` | `sender`, `receiver`, `read`, `search` | `/api/conversations/2/messages/?read=false` |
 | `/api/notifications/` | `receiver`, `type`, `is_read` | `/api/notifications/?type=message&is_read=false` |
 
 ---

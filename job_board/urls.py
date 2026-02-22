@@ -15,8 +15,10 @@ router.register(r'jobs', PublicJobViewSet, basename='job')
 router.register(r'profiles', ProfileViewSet, basename='profile')
 router.register(r'categories', CategoryViewSets, basename='category')
 router.register(r'conversations', ConversationViewSet, basename='conversation')
-router.register(r'messages', MessageViewSet, basename='message')
 router.register(r'notifications', NotificationViewSet, basename='notification')
+
+conversation_router = NestedDefaultRouter(router, r'conversations', lookup='conversation')
+conversation_router.register(r'messages', MessageViewSet, basename='conversation-messages')
 
 job_router = NestedDefaultRouter(router, r'jobs', lookup='job')
 job_router.register(r'applications', JobApplicationViewSets, basename='job-applications')
@@ -33,6 +35,7 @@ user_router.register(r'applications', UserApplicationsViewSet, basename='user-ap
 
 urlpatterns =[
     path('', include(router.urls)),
+    path('', include(conversation_router.urls)),
     path('', include(company_router.urls)),
     path('', include(company_job_apps.urls)),
     path('', include(job_router.urls)),

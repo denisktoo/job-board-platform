@@ -77,7 +77,7 @@ class ConversationSerializer(serializers.ModelSerializer):
 class MessageSerializer(serializers.ModelSerializer):
     sender = UserSerializer(read_only=True)
     conversation = ConversationSerializer(read_only=True)
-    conversation_id = serializers.PrimaryKeyRelatedField(source='conversation', queryset=Conversation.objects.all(), write_only=True)
+    conversation_id = serializers.PrimaryKeyRelatedField(source='conversation', queryset=Conversation.objects.all(), write_only=True, required=False)
     parent_message_id = serializers.PrimaryKeyRelatedField(source='parent_message', queryset=Message.objects.all(), write_only=True, required=False, allow_null=True)
     parent_message = serializers.PrimaryKeyRelatedField(read_only=True)
     receiver = UserSerializer(read_only=True)

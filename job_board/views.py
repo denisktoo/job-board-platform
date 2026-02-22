@@ -371,7 +371,9 @@ class MessageViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
-        return (
+        conversation_pk = self.kwargs.get('conversation_pk')
+
+        queryset = (
             Message.objects
             .filter(conversation__participants=user)
             .select_related('sender', 'receiver', 'conversation', 'parent_message')
@@ -381,9 +383,22 @@ class MessageViewSet(viewsets.ModelViewSet):
             )
             .order_by('created_at')
         )
+
+        if conversation_pk:
+            queryset = queryset.filter(conversation_id=conversation_pk)
+
+        return queryset
     
     def perform_create(self, serializer):
-        conversation = serializer.validated_data['conversation']
+        conversation_pk = self.kwargs.get('conversation_pk')
+        conversation = serializer.validated_data.get('conversation')
+
+        if conversation_pk:
+            conversation = get_object_or_404(Conversation, pk=conversation_pk)
+
+        if not conversation:
+            raise ValidationError("Conversation is required.")
+
         parent_message = serializer.validated_data.get('parent_message')
 
         # Ensure user is a participant of the conversation
@@ -393,7 +408,7 @@ class MessageViewSet(viewsets.ModelViewSet):
         if parent_message and parent_message.conversation_id != conversation.conversation_id:
             raise ValidationError("Reply message must belong to the same conversation.")
 
-        serializer.save(sender=self.request.user)
+        serializer.save(sender=self.request.user, conversation=conversation)
 
     def perform_update(self, serializer):
         message = self.get_object()
@@ -433,9 +448,12 @@ class MessageViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['get'], url_path='inbox/unread')
     def unread_inbox(self, request):
+        conversation_pk = self.kwargs.get('conversation_pk')
+
         unread_messages = (
             Message.unread_messages
             .unread_for_user(request.user)
+            .filter(conversation_id=conversation_pk)
             .select_related('sender')
             .only(
                 'message_id',
