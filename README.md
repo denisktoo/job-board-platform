@@ -382,7 +382,8 @@ Authorization: Bearer <access_token>
 ## 💬 Conversations & Messaging
 
 * **Create Conversation (Authenticated)** → `POST /api/conversations/`
-  *What it does:* Creates a conversation and automatically includes the logged-in user as a participant.
+  *What it does:* Creates a conversation and automatically includes the logged-in user as sender-participant.
+  *Required field:* `participant_ids` (at least one receiver participant; can include your own user for self-chat)
 * **List My Conversations (Authenticated)** → `GET /api/conversations/`
   *What it does:* Returns conversations where the logged-in user is a participant.
 * **Filter Conversations by Participant (UUID)** → `GET /api/conversations/?participant={user_id}`
@@ -391,7 +392,8 @@ Authorization: Bearer <access_token>
 * **Send Message** → `POST /api/conversations/{conversation_id}/messages/`
   *What it does:* Sends a message in a conversation.
   *Required fields:* `content`
-  *Optional fields:* `receiver_id`, `parent_message_id` (for threaded replies)
+  *Optional fields:* `parent_message_id` (for threaded replies)
+  *Receiver behavior:* Receiver is derived automatically from conversation participants (or sender for self-chat).
 
 * **List Messages in Conversation** → `GET /api/conversations/{conversation_id}/messages/`
   *What it does:* Returns messages from conversations where the logged-in user participates.
@@ -412,7 +414,6 @@ Message create example:
 
 ```json
 {
-  "receiver_id": "a8d06878-fbe4-433e-95ac-1a6c81173606",
   "content": "Hello, are you available for an interview this week?"
 }
 ```
@@ -422,8 +423,35 @@ Reply message example:
 ```json
 {
   "parent_message_id": 15,
-  "receiver_id": "b98f4506-096d-449a-98c7-dd0ba331f98a",
   "content": "Yes, Thursday works for me."
+}
+```
+
+How `participant_ids` works (important):
+
+- `participant_ids` should contain the `user_id` values of the users you want in the conversation.
+- Always send only the target participants you want to include.
+- The API automatically adds the currently logged-in user as a participant.
+- For **texting another user**, pass that other user’s `user_id`.
+- For **texting self**, pass your own currently logged-in `user_id`.
+
+Conversation create example (texting another user):
+
+```json
+{
+  "participant_ids": [
+    "a8d06878-fbe4-433e-95ac-1a6c81173606"
+  ]
+}
+```
+
+Conversation create example (texting self):
+
+```json
+{
+  "participant_ids": [
+    "b98f4506-096d-449a-98c7-dd0ba331f98a"
+  ]
 }
 ```
 

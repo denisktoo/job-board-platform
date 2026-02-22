@@ -81,7 +81,6 @@ class MessageSerializer(serializers.ModelSerializer):
     parent_message_id = serializers.PrimaryKeyRelatedField(source='parent_message', queryset=Message.objects.all(), write_only=True, required=False, allow_null=True)
     parent_message = serializers.PrimaryKeyRelatedField(read_only=True)
     receiver = UserSerializer(read_only=True)
-    receiver_id = serializers.PrimaryKeyRelatedField(source='receiver', queryset=User.objects.all(), write_only=True, required=False, allow_null=True)
     edit_history = serializers.SerializerMethodField()
 
     def get_edit_history(self, obj):
@@ -93,7 +92,7 @@ class MessageSerializer(serializers.ModelSerializer):
         fields = [
             'message_id', 'conversation', 'conversation_id',
             'parent_message', 'parent_message_id',
-            'sender', 'receiver', 'receiver_id',
+            'sender', 'receiver',
             'content', 'read', 'edited', 'created_at', 'edit_history'
         ]
 

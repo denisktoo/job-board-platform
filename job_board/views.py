@@ -355,6 +355,10 @@ class ConversationViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         participants = serializer.validated_data.get('participants', [])
+
+        if not participants:
+            raise ValidationError("At least one participant (receiver) must be provided when creating a conversation.")
+
         conversation = serializer.save()
 
         participant_ids = {self.request.user.user_id}
@@ -373,6 +377,9 @@ class MessageViewSet(viewsets.ModelViewSet):
         user = self.request.user
         conversation_pk = self.kwargs.get('conversation_pk')
 
+        if not conversation_pk:
+            raise NotFound("Conversation context is required.")
+
         queryset = (
             Message.objects
             .filter(conversation__participants=user)
@@ -384,20 +391,15 @@ class MessageViewSet(viewsets.ModelViewSet):
             .order_by('created_at')
         )
 
-        if conversation_pk:
-            queryset = queryset.filter(conversation_id=conversation_pk)
-
-        return queryset
+        return queryset.filter(conversation_id=conversation_pk)
     
     def perform_create(self, serializer):
         conversation_pk = self.kwargs.get('conversation_pk')
-        conversation = serializer.validated_data.get('conversation')
 
-        if conversation_pk:
-            conversation = get_object_or_404(Conversation, pk=conversation_pk)
+        if not conversation_pk:
+            raise ValidationError("Conversation context is required.")
 
-        if not conversation:
-            raise ValidationError("Conversation is required.")
+        conversation = get_object_or_404(Conversation, pk=conversation_pk)
 
         parent_message = serializer.validated_data.get('parent_message')
 
@@ -408,7 +410,18 @@ class MessageViewSet(viewsets.ModelViewSet):
         if parent_message and parent_message.conversation_id != conversation.conversation_id:
             raise ValidationError("Reply message must belong to the same conversation.")
 
-        serializer.save(sender=self.request.user, conversation=conversation)
+        receiver = (
+            conversation.participants
+            .exclude(user_id=self.request.user.user_id)
+            .order_by('user_id')
+            .first()
+        ) or self.request.user
+
+        serializer.save(
+            sender=self.request.user,
+            receiver=receiver,
+            conversation=conversation
+        )
 
     def perform_update(self, serializer):
         message = self.get_object()
@@ -449,6 +462,9 @@ class MessageViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['get'], url_path='inbox/unread')
     def unread_inbox(self, request):
         conversation_pk = self.kwargs.get('conversation_pk')
+
+        if not conversation_pk:
+            raise NotFound("Conversation context is required.")
 
         unread_messages = (
             Message.unread_messages
