@@ -148,3 +148,28 @@ class IsOwnerOrAdmin(permissions.BasePermission):
 
         # Only allow users to access their own profile
         return obj.user == request.user
+
+class IsParticipantOrAdmin(permissions.BasePermission):
+    """
+    - Admin: full access
+    - Participants: can view/update conversations they are part of
+    """
+
+    def has_permission(self, request, view):
+        # Must be authenticated
+        return request.user and request.user.is_authenticated
+
+    def has_object_permission(self, request, view, obj):
+        # Admin can access everything
+        if getattr(request.user, 'role', None) == 'admin':
+            return True
+
+        participants = getattr(obj, 'participants', None)
+        if participants is not None:
+            return request.user in participants.all()
+
+        conversation = getattr(obj, 'conversation', None)
+        if conversation is not None:
+            return request.user in conversation.participants.all()
+        
+        return False

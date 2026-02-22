@@ -2,18 +2,21 @@ from django.shortcuts import render
 from .serializer import (
     UserSerializer, CompanySerializer, CategorySerializer, JobSerializer
     , ApplicationSerializer, RegisterSerializer, ProfileSerializer
-    , CompanyReviewSerializer, NotificationSerializer
+    , CompanyReviewSerializer, NotificationSerializer, MessageSerializer
+    , ConversationSerializer, MessageHistorySerializer, ThreadedMessageSerializer
+    , UnreadInboxMessageSerializer
 )
 from rest_framework import viewsets, generics, status
 from rest_framework.filters import SearchFilter, OrderingFilter
 from django_filters.rest_framework import DjangoFilterBackend
 from .models import (
-    User, Company, Category, Job, Application, Profile, CompanyReview, Notification
+    User, Company, Category, Job, Application, Profile, CompanyReview, Notification, Message, Conversation,
+    MessageHistory
 )
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from .permissions import (
     IsAdminUser, IsApplicantOrAdminUser, IsRecruiterOrAdminUser, IsApplicantOrAdmin,
-    IsOwnerOrAdmin
+    IsOwnerOrAdmin, IsParticipantOrAdmin
 )
 from rest_framework.exceptions import (
     MethodNotAllowed, ValidationError, NotFound, PermissionDenied
@@ -24,10 +27,12 @@ from .tasks import (
 )
 from rest_framework.parsers import MultiPartParser, FormParser
 from .filter import (
-    ApplicationFilter, JobFilter, ProfileFilter, NotificationFilter, CompanyReviewFilter
+    ApplicationFilter, JobFilter, ProfileFilter, NotificationFilter, CompanyReviewFilter,
+    CompanyFilter, CategoryFilter, UserFilter, ConversationFilter, MessageFilter
 )
 from django.shortcuts import get_object_or_404
 from rest_framework.decorators import action
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from django.http import JsonResponse
 from rest_framework.views import APIView
@@ -35,11 +40,15 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
 from django.db import transaction
+from django.db.models import Prefetch
 
 class UserViewSets(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = [IsApplicantOrAdmin]
+    filter_backends = [DjangoFilterBackend, SearchFilter]
+    filterset_class = UserFilter
+    search_fields = ['username', 'email', 'first_name', 'last_name']
 
     def get_queryset(self):
         # Skip logic during Swagger schema generation
@@ -77,6 +86,9 @@ class CompanyViewSets(viewsets.ModelViewSet):
     # queryset = Company.objects.all()
     serializer_class = CompanySerializer
     permission_classes = [IsRecruiterOrAdminUser]
+    filter_backends = [DjangoFilterBackend, SearchFilter]
+    filterset_class = CompanyFilter
+    search_fields = ['name', 'industry', 'location']
 
     def get_queryset(self):
         user = self.request.user
@@ -114,6 +126,9 @@ class CategoryViewSets(viewsets.ModelViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
     permission_classes = [IsAdminUser]
+    filter_backends = [DjangoFilterBackend, SearchFilter]
+    filterset_class = CategoryFilter
+    search_fields = ['name']
 
 # @method_decorator(cache_page(60 * 15), name="list")
 # @method_decorator(cache_page(60 * 15), name="retrieve")
@@ -317,6 +332,126 @@ class CompanyReviewViewSet(viewsets.ModelViewSet):
         # Save the review with current user & company
         serializer.save(user=self.request.user, company=company)
 
+class ConversationViewSet(viewsets.ModelViewSet):
+    serializer_class = ConversationSerializer
+    permission_classes = [IsParticipantOrAdmin]
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = ConversationFilter
+
+    def get_queryset(self):
+        user = self.request.user
+        return (
+            Conversation.objects
+            .filter(participants=user)
+            .prefetch_related(
+                'participants',
+                Prefetch(
+                    'messages',
+                    queryset=Message.objects.select_related('sender', 'receiver', 'parent_message').order_by('created_at')
+                )
+            )
+            .order_by('-created_at')
+        )
+
+    def perform_create(self, serializer):
+        participants = serializer.validated_data.get('participants', [])
+        conversation = serializer.save()
+
+        participant_ids = {self.request.user.user_id}
+        participant_ids.update(user.user_id for user in participants)
+
+        conversation.participants.set(User.objects.filter(user_id__in=participant_ids))
+
+class MessageViewSet(viewsets.ModelViewSet):
+    serializer_class = MessageSerializer
+    permission_classes = [IsParticipantOrAdmin]
+    filter_backends = [DjangoFilterBackend, SearchFilter]
+    filterset_class = MessageFilter
+    search_fields = ['content', 'sender__username', 'receiver__username']
+
+    def get_queryset(self):
+        user = self.request.user
+        return (
+            Message.objects
+            .filter(conversation__participants=user)
+            .select_related('sender', 'receiver', 'conversation', 'parent_message')
+            .prefetch_related(
+                'edit_history',
+                Prefetch('replies', queryset=Message.objects.select_related('sender', 'receiver').order_by('created_at'))
+            )
+            .order_by('created_at')
+        )
+    
+    def perform_create(self, serializer):
+        conversation = serializer.validated_data['conversation']
+        parent_message = serializer.validated_data.get('parent_message')
+
+        # Ensure user is a participant of the conversation
+        if self.request.user not in conversation.participants.all():
+            raise PermissionDenied("You cannot send messages to a conversation you are not part of.")
+
+        if parent_message and parent_message.conversation_id != conversation.conversation_id:
+            raise ValidationError("Reply message must belong to the same conversation.")
+
+        serializer.save(sender=self.request.user)
+
+    def perform_update(self, serializer):
+        message = self.get_object()
+        role = getattr(self.request.user, 'role', None)
+
+        if role != 'admin' and message.sender != self.request.user:
+            raise PermissionDenied("You can only edit your own messages.")
+
+        serializer.save()
+
+    @action(detail=True, methods=['get'], url_path='history')
+    def history(self, request, pk=None):
+        message = self.get_object()
+        history_queryset = message.edit_history.all()
+        serializer = MessageHistorySerializer(history_queryset, many=True)
+        return Response(serializer.data)
+
+    def _get_recursive_replies(self, parent_message):
+        replies = list(
+            Message.objects
+            .filter(parent_message=parent_message)
+            .select_related('sender', 'receiver', 'parent_message')
+            .order_by('created_at')
+        )
+
+        for reply in replies:
+            reply._threaded_replies = self._get_recursive_replies(reply)
+
+        return replies
+
+    @action(detail=True, methods=['get'], url_path='thread')
+    def thread(self, request, pk=None):
+        root_message = self.get_object()
+        root_message._threaded_replies = self._get_recursive_replies(root_message)
+        serializer = ThreadedMessageSerializer(root_message)
+        return Response(serializer.data)
+
+    @action(detail=False, methods=['get'], url_path='inbox/unread')
+    def unread_inbox(self, request):
+        unread_messages = (
+            Message.unread_messages
+            .unread_for_user(request.user)
+            .select_related('sender')
+            .only(
+                'message_id',
+                'conversation_id',
+                'sender_id',
+                'sender__username',
+                'content',
+                'created_at',
+                'read',
+            )
+            .order_by('-created_at')
+        )
+
+        serializer = UnreadInboxMessageSerializer(unread_messages, many=True)
+        return Response(serializer.data)
+
 class NotificationViewSet(viewsets.ModelViewSet):
     serializer_class = NotificationSerializer
     filter_backends = [DjangoFilterBackend]
@@ -327,27 +462,16 @@ class NotificationViewSet(viewsets.ModelViewSet):
         if getattr(self, "swagger_fake_view", False):
             return Notification.objects.none()
 
-        company_pk = self.kwargs.get('company_pk')
-
-        # Check if company exists
-        try:
-            company = Company.objects.get(company_id=company_pk)
-        except Company.DoesNotExist:
-            raise NotFound("Company does not exist.")
-
         role = getattr(self.request.user, 'role', None)
 
-        # Admins can see all
+        # Admins can see all notifications
         if role == 'admin':
-            return Notification.objects.filter(company=company)
+            return Notification.objects.all()
 
-        # Recruiters only see their own company's notifications
-        if role == 'recruiter':
-            if company.user != self.request.user:
-                raise PermissionDenied("You cannot access notifications for another company.")
-            return Notification.objects.filter(company=company)
+        # Authenticated non-admin users only see notifications addressed to them
+        if self.request.user and self.request.user.is_authenticated:
+            return Notification.objects.filter(receiver=self.request.user)
 
-        # Users have no access
         raise PermissionDenied("You do not have permission to access this request.")
 
     def create(self, request, *args, **kwargs):
@@ -357,22 +481,16 @@ class NotificationViewSet(viewsets.ModelViewSet):
     def mark_as_read(self, request, company_pk=None, pk=None):
         """Custom route to mark a notification as read"""
 
-        # Ensure company exists
-        company = get_object_or_404(Company, company_id=company_pk)
-
         role = getattr(request.user, 'role', None)
 
-        # Admins can mark any company's notifications
+        # Admins can mark any notification
         if role == 'admin':
-            notification = get_object_or_404(Notification, pk=pk, company=company)
+            notification = get_object_or_404(Notification, pk=pk)
 
-        # Recruiters can only mark their own company's notifications
-        elif role == 'recruiter':
-            if company.user != request.user:
-                raise PermissionDenied("You cannot mark notifications for another company.")
-            notification = get_object_or_404(Notification, pk=pk, company=company)
+        # Non-admins can mark only their own notifications
+        elif request.user and request.user.is_authenticated:
+            notification = get_object_or_404(Notification, pk=pk, receiver=request.user)
 
-        # user role cannot mark notifications
         else:
             raise PermissionDenied("You do not have permission to perform this action.")
 
@@ -392,3 +510,10 @@ def home(request):
         },
         json_dumps_params={"ensure_ascii": False}
     )
+
+class DeleteUserViewSet(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def delete(self, request):
+        request.user.delete()
+        return Response({"message": "User account deleted successfully."}, status=status.HTTP_200_OK)

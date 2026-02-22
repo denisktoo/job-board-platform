@@ -5,6 +5,7 @@ from .views import (
     UserViewSets, CompanyViewSets, CategoryViewSets, JobViewSets, JobApplicationViewSets
     , RegisterView, UserApplicationsViewSet, CompanyJobApplicationsViewSet, PublicJobViewSet
     , ProfileViewSet, CompanyReviewViewSet, NotificationViewSet
+    , ConversationViewSet, MessageViewSet, DeleteUserViewSet
 )
 
 router = routers.DefaultRouter()
@@ -13,6 +14,9 @@ router.register(r'companies', CompanyViewSets, basename='company')
 router.register(r'jobs', PublicJobViewSet, basename='job')
 router.register(r'profiles', ProfileViewSet, basename='profile')
 router.register(r'categories', CategoryViewSets, basename='category')
+router.register(r'conversations', ConversationViewSet, basename='conversation')
+router.register(r'messages', MessageViewSet, basename='message')
+router.register(r'notifications', NotificationViewSet, basename='notification')
 
 job_router = NestedDefaultRouter(router, r'jobs', lookup='job')
 job_router.register(r'applications', JobApplicationViewSets, basename='job-applications')
@@ -20,7 +24,6 @@ job_router.register(r'applications', JobApplicationViewSets, basename='job-appli
 company_router = NestedDefaultRouter(router, r'companies', lookup='company')
 company_router.register(r'jobs', JobViewSets, basename='company-jobs')
 company_router.register(r'reviews', CompanyReviewViewSet, basename='company-reviews')
-company_router.register(r'notifications', NotificationViewSet, basename='company-notifications')
 
 company_job_apps = NestedDefaultRouter(company_router, r'jobs', lookup='job')
 company_job_apps.register(r'applications', CompanyJobApplicationsViewSet, basename='company-job-applications')
@@ -35,4 +38,5 @@ urlpatterns =[
     path('', include(job_router.urls)),
     path('', include(user_router.urls)),
     path('register/', RegisterView.as_view(), name='register'),
+    path('delete-account/', DeleteUserViewSet.as_view(), name='delete-account'),
 ]

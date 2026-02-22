@@ -131,20 +131,67 @@ class CompanyReview(models.Model):
 
     def __str__(self):
         return f"{self.company.name} review by {self.user.username} ({self.rating}/5)"
-    
+
+class Conversation(models.Model):
+    conversation_id = models.AutoField(primary_key=True)
+    participants = models.ManyToManyField('User', related_name='conversations', db_index=True)
+    created_at = models.DateTimeField(auto_now_add=True, db_index=True)
+
+    def __str__(self):
+        return f"Conversation between {', '.join([user.username for user in self.participants.all()])}"
+
+class UnreadMessagesManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().filter(read=False)
+
+    def unread_for_user(self, user):
+        return self.get_queryset().filter(receiver=user)
+
+class Message(models.Model):
+    message_id = models.AutoField(primary_key=True)
+    conversation = models.ForeignKey('Conversation', on_delete=models.CASCADE, related_name='messages', db_index=True)
+    parent_message = models.ForeignKey('self', on_delete=models.CASCADE, related_name='replies', db_index=True, null=True, blank=True)
+    sender = models.ForeignKey('User', on_delete=models.CASCADE, related_name='sent_messages', db_index=True)
+    receiver = models.ForeignKey('User', on_delete=models.CASCADE, related_name='received_messages', db_index=True, null=True, blank=True)
+    content = models.TextField()
+    read = models.BooleanField(default=False, db_index=True)
+    edited = models.BooleanField(default=False, db_index=True)
+    created_at = models.DateTimeField(auto_now_add=True, db_index=True)
+
+    objects = models.Manager()
+    unread_messages = UnreadMessagesManager()
+
+    def __str__(self):
+        return f"Message from {self.sender.username} at {self.created_at}"
+
 class Notification(models.Model):
     notification_id = models.AutoField(primary_key=True)
-    user = models.ForeignKey('User', on_delete=models.CASCADE, related_name='notifications', db_index=True, null=True, blank=True)
-    company = models.ForeignKey('Company', on_delete=models.CASCADE, related_name='notifications', db_index=True, null=True, blank=True)
+    receiver = models.ForeignKey('User', on_delete=models.CASCADE, related_name='notifications', db_index=True, null=True, blank=True)
+    message = models.ForeignKey('Message', on_delete=models.CASCADE, related_name='notifications', db_index=True, null=True, blank=True)
 
     TYPE_CHOICES = [
-        ('review', 'Review')
+        ('review', 'Review'),
+        ('application', 'Application'),
+        ('message', 'Message'),
     ]
 
-    type = models.CharField(max_length=20, choices=TYPE_CHOICES, default='review', db_index=True)
-    content = models.TextField()
+    type = models.CharField(max_length=20, choices=TYPE_CHOICES, db_index=True)
+    notification = models.CharField(max_length=255, null=True, blank=True)
     is_read = models.BooleanField(default=False, db_index=True)
     created_at = models.DateTimeField(auto_now_add=True, db_index=True)
 
     def __str__(self):
-        return f"Notification for {self.review.company.name}: {self.content[:30]}"
+        return f"Notification for {self.receiver.username if self.receiver else 'Unknown'} at {self.created_at}"
+
+class MessageHistory(models.Model):
+    message_history_id = models.AutoField(primary_key=True)
+    message = models.ForeignKey('Message', on_delete=models.CASCADE, related_name='edit_history', db_index=True)
+    old_content = models.TextField()
+    edited_at = models.DateTimeField(auto_now_add=True, db_index=True)
+
+    class Meta:
+        ordering = ['-edited_at']
+
+    def __str__(self):
+        return f"History for message {self.message_id} at {self.edited_at}"
+

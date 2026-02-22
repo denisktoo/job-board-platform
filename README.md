@@ -31,7 +31,7 @@ You can now run the entire stack — including **PostgreSQL**, **Redis**, **Rabb
 ### 🐳 Using Docker Compose
 
 ```bash
-docker-compose up --build
+docker compose up -d --build
 ```
 
 This command:
@@ -57,7 +57,7 @@ Once everything is running:
 After you have run the initial command successfully and the images have been built, you can use a simpler command for subsequent startups, provided you haven't changed the underlying Dockerfiles or source code that needs to be baked into a new image:
 
 ```bash
-docker-compose up
+docker compose up -d
 ```
 
 This subsequent command reuses the existing, built images, allowing your application stack to start up much faster.
@@ -65,7 +65,23 @@ This subsequent command reuses the existing, built images, allowing your applica
 If you make changes to your application code and need those changes to be reflected in a running container, use the `--build` flag again:
 
 ```bash
-docker-compose up --build
+docker compose up -d --build
+```
+
+Quick operational commands:
+
+```bash
+# check running services
+docker compose ps
+
+# see web logs
+docker compose logs -f web
+
+# stop services (keep containers)
+docker compose stop
+
+# remove containers/network
+docker compose down
 ```
 
 ### 🧩 Local Manual Setup (without Docker)
@@ -226,7 +242,10 @@ DRF API root — returns links to top-level resources:
   "companies": "http://127.0.0.1:8000/api/companies/",
   "jobs": "http://127.0.0.1:8000/api/jobs/",
   "profiles": "http://127.0.0.1:8000/api/profiles/",
-  "categories": "http://127.0.0.1:8000/api/categories/"
+  "categories": "http://127.0.0.1:8000/api/categories/",
+  "conversations": "http://127.0.0.1:8000/api/conversations/",
+  "messages": "http://127.0.0.1:8000/api/messages/",
+  "notifications": "http://127.0.0.1:8000/api/notifications/"
 }
 ```
 
@@ -234,8 +253,8 @@ DRF API root — returns links to top-level resources:
 
 ## 👤 Profile Management (User/Admin only)
 
-* **Create or Update Profile (User/Admin)** → `POST /api/profile/` or `PATCH /api/profile/{profile_id}/`
-* **View Profile (User/Admin)** → `GET /api/profile/{profile_id}/`
+* **Create or Update Profile (User/Admin)** → `POST /api/profiles/` or `PATCH /api/profiles/{profile_id}/`
+* **View Profile (User/Admin)** → `GET /api/profiles/{profile_id}/`
 
 Example request body:
 
@@ -258,9 +277,11 @@ Example request body:
 ## 👥 User Management
 
 * **List All Users (Admin only)** → `GET /api/users/`
+* **Filter Users (Admin only)** → `GET /api/users/?username=kip&role=user`
 * **View Own Applications (User/Admin)** → `GET /api/users/{user_id}/applications/`
 * **Search Own Applications (User/Admin)** → `GET /api/users/{user_id}/applications/?search=Market`
 * **Update Own Application (User/Admin)** → `PATCH /api/users/{user_id}/applications/{application_id}/`
+* **Delete Own Account (Authenticated)** → `DELETE /api/delete-account/` (deletes logged-in user and triggers cleanup signals)
 
 Supports multipart form for file updates:
 
@@ -288,6 +309,7 @@ curl -X PATCH "http://127.0.0.1:8000/api/users/{user_id}/applications/{applicati
   ```
 
 * **List Companies (Public)** → `GET /api/companies/`
+* **Filter Companies** → `GET /api/companies/?name=tech&location=nairobi&industry=software`
 * **Create Job under a Company (Recruiter/Admin)** → `POST /api/companies/{company_id}/jobs/`
   ```json
   {
@@ -331,9 +353,9 @@ Request example:
 **Notifications**
 
 * A `CompanyReview` `post_save` signal automatically creates a `Notification` for the company (via your signals).
-* **List Notifications (Recruiter/Admin)** → `GET /api/companies/{company_id}/notifications/`
-* **Mark Notification as Read (Recruiter/Admin)** →
-  `PATCH /api/companies/{company_id}/notifications/{notification_id}/mark-as-read/`
+* **List Notifications (Authenticated)** → `GET /api/notifications/`
+* **Filter Notifications** → `GET /api/notifications/?type=message&is_read=false`
+* **Mark Notification as Read** → `PATCH /api/notifications/{notification_id}/mark-as-read/`
 
 **Request Headers:**
 
@@ -345,14 +367,86 @@ Authorization: Bearer <access_token>
 
 ```json
 {
-  "id": 5,
-  "company": 1,
-  "type": "review",
-  "content": "New review added to your company.",
+  "notification_id": 5,
+  "receiver": {
+    "user_id": "b98f4506-096d-449a-98c7-dd0ba331f98a",
+    "username": "kip"
+  },
+  "type": "message",
   "is_read": true,
   "created_at": "2025-09-22T12:34:56Z"
 }
 ```
+
+---
+
+## 💬 Conversations & Messaging
+
+* **Create Conversation (Authenticated)** → `POST /api/conversations/`
+  *What it does:* Creates a conversation and automatically includes the logged-in user as a participant.
+* **List My Conversations (Authenticated)** → `GET /api/conversations/`
+  *What it does:* Returns conversations where the logged-in user is a participant.
+* **Filter Conversations by Participant (UUID)** → `GET /api/conversations/?participant={user_id}`
+* **Get One Conversation** → `GET /api/conversations/{conversation_id}/`
+
+* **Send Message** → `POST /api/messages/`
+  *What it does:* Sends a message in a conversation.
+  *Required fields:* `conversation_id`, `content`
+  *Optional fields:* `receiver_id`, `parent_message_id` (for threaded replies)
+
+* **List My Messages** → `GET /api/messages/`
+  *What it does:* Returns messages from conversations where the logged-in user participates.
+* **Filter Messages** → `GET /api/messages/?conversation=2&sender={user_id}&read=false`
+* **Edit Own Message** → `PATCH /api/messages/{message_id}/`
+  *What it does:* Updates message content; old content is saved in `MessageHistory` and `edited=true` is set.
+
+* **Get Message Edit History** → `GET /api/messages/{message_id}/history/`
+  *What it does:* Returns previous versions of that message.
+* **Get Threaded Replies** → `GET /api/messages/{message_id}/thread/`
+  *What it does:* Returns recursive nested replies for that message.
+
+* **Unread Inbox (Custom Manager)** → `GET /api/messages/inbox/unread/`
+  *What it does:* Uses custom ORM manager to return unread messages for the current user only.
+  *Optimization:* Uses `.only()` and `select_related('sender')` for lightweight inbox queries.
+
+Message create example:
+
+```json
+{
+  "conversation_id": 2,
+  "receiver_id": "a8d06878-fbe4-433e-95ac-1a6c81173606",
+  "content": "Hello, are you available for an interview this week?"
+}
+```
+
+Reply message example:
+
+```json
+{
+  "conversation_id": 2,
+  "parent_message_id": 15,
+  "receiver_id": "b98f4506-096d-449a-98c7-dd0ba331f98a",
+  "content": "Yes, Thursday works for me."
+}
+```
+
+---
+
+## 🔎 Available Query Params
+
+| Endpoint | Query Params | Example |
+| --- | --- | --- |
+| `/api/users/` | `username`, `email`, `role`, `search` | `/api/users/?username=kip&role=user` |
+| `/api/companies/` | `name`, `location`, `industry`, `search` | `/api/companies/?location=nairobi&industry=software` |
+| `/api/categories/` | `name`, `search` | `/api/categories/?name=software` |
+| `/api/jobs/` | `employment_type`, `deadline`, `category`, `company`, `search`, `ordering` | `/api/jobs/?employment_type=full_time&search=engineer` |
+| `/api/users/{user_id}/applications/` | `status`, `job`, `user`, `resume`, `cover_letter`, `search` | `/api/users/{user_id}/applications/?resume=true&search=backend` |
+| `/api/companies/{company_id}/jobs/{job_id}/applications/` | `status`, `job`, `user`, `resume`, `cover_letter`, `search` | `/api/companies/1/jobs/2/applications/?cover_letter=true` |
+| `/api/profiles/` | `location`, `skills`, `experience` | `/api/profiles/?skills=django&location=nairobi` |
+| `/api/companies/{company_id}/reviews/` | `company`, `user`, `rating_min`, `rating_max` | `/api/companies/1/reviews/?rating_min=4` |
+| `/api/conversations/` | `participant` | `/api/conversations/?participant={user_id}` |
+| `/api/messages/` | `sender`, `receiver`, `conversation`, `read`, `search` | `/api/messages/?conversation=2&read=false` |
+| `/api/notifications/` | `receiver`, `type`, `is_read` | `/api/notifications/?type=message&is_read=false` |
 
 ---
 
@@ -375,6 +469,7 @@ Request Example:
 ```
 
 * **List Categories (Authenticated users only)** → `GET /api/categories/`
+* **Filter Categories** → `GET /api/categories/?name=software`
 * **Update Category (Admin only)** → `PATCH /api/categories/{category_id}/`
 
 ---
@@ -467,6 +562,8 @@ Example paginated response:
 ### ✅ Signals
 
 * Creating a `CompanyReview` triggers a `Notification` via `post_save` signal.
+* Editing a `Message` stores old content in `MessageHistory` via `pre_save` signal.
+* Deleting a `User` triggers cleanup of related messages, notifications, and message histories via `post_delete` signal.
 
 ### ✅ Middleware
 
@@ -500,7 +597,7 @@ If Swagger UI looks broken (missing CSS/JS), ensure:
 1. Start containers:
 
    ```bash
-   docker-compose up --build
+  docker compose up -d --build
    ```
 2. Register as a **Recruiter** → create companies & jobs
 3. Register as a **User** → apply for jobs
@@ -510,6 +607,14 @@ If Swagger UI looks broken (missing CSS/JS), ensure:
 7. View background task execution in Celery logs
 
 ---
+
+<!-- ## 🧯 Docker Troubleshooting Guide
+
+For detailed Docker troubleshooting (startup modes, logs, restart/rebuild strategy, common errors, and reset workflows), see:
+
+- `docs/docker-troubleshooting-guide.md`
+
+--- -->
 
 ## ⚙️ CI/CD & Deployment
 
