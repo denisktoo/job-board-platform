@@ -596,9 +596,10 @@ If Swagger UI looks broken (missing CSS/JS), ensure:
 
 1. Start containers:
 
-   ```bash
-  docker compose up -d --build
-   ```
+```bash
+docker compose up -d --build
+```
+
 2. Register as a **Recruiter** → create companies & jobs
 3. Register as a **User** → apply for jobs
 4. Use JWT tokens in request headers
@@ -608,13 +609,15 @@ If Swagger UI looks broken (missing CSS/JS), ensure:
 
 ---
 
-<!-- ## 🧯 Docker Troubleshooting Guide
+<!--
+## 🧯 Docker Troubleshooting Guide
 
 For detailed Docker troubleshooting (startup modes, logs, restart/rebuild strategy, common errors, and reset workflows), see:
 
 - `docs/docker-troubleshooting-guide.md`
 
---- -->
+---
+-->
 
 ## ⚙️ CI/CD & Deployment
 
