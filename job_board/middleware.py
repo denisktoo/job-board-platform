@@ -1,6 +1,8 @@
-from datetime import datetime
 import os
+from datetime import datetime
+
 from rest_framework_simplejwt.authentication import JWTAuthentication
+
 
 class RequestLoggingMiddleware:
     def __init__(self, get_response):
@@ -27,4 +29,3 @@ class RequestLoggingMiddleware:
 
         response = self.get_response(request)
         return response
-    

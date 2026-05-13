@@ -1,5 +1,7 @@
 from rest_framework import permissions
-from .models import Company, Job, Application, CompanyReview
+
+from .models import Application, Company, CompanyReview, Job
+
 
 class IsAdminUser(permissions.BasePermission):
     """
@@ -13,7 +15,8 @@ class IsAdminUser(permissions.BasePermission):
             return True
 
         # Unsafe methods only allowed for admins
-        return getattr(request.user, 'role', None) == 'admin'
+        return getattr(request.user, "role", None) == "admin"
+
 
 class IsRecruiterOrAdminUser(permissions.BasePermission):
     """
@@ -26,7 +29,10 @@ class IsRecruiterOrAdminUser(permissions.BasePermission):
         role = getattr(request.user, "role", None)
 
         # Only recruiters/admins can access company-job-applications endpoint
-        if view.basename == "company-job-applications" and role not in ["recruiter", "admin"]:
+        if view.basename == "company-job-applications" and role not in [
+            "recruiter",
+            "admin",
+        ]:
             return False
 
         # SAFE methods allowed for everyone
@@ -78,6 +84,7 @@ class IsRecruiterOrAdminUser(permissions.BasePermission):
 
         return False
 
+
 class IsApplicantOrAdmin(permissions.BasePermission):
     """
     - Admins: full access
@@ -88,18 +95,18 @@ class IsApplicantOrAdmin(permissions.BasePermission):
         # Only authenticated users with role 'user' or 'admin'
         if not request.user.is_authenticated:
             return False
-        return getattr(request.user, 'role', None) in ['user', 'admin']
+        return getattr(request.user, "role", None) in ["user", "admin"]
 
     def has_object_permission(self, request, view, obj):
-        role = getattr(request.user, 'role', None)
+        role = getattr(request.user, "role", None)
 
         # Admin has complete access
-        if role == 'admin':
+        if role == "admin":
             return True
-        
+
         # Applicant can access only their own applicaition and profile
-        if role == 'user':
-            if hasattr(obj, 'user'):  # Profile object
+        if role == "user":
+            if hasattr(obj, "user"):  # Profile object
                 return obj.user == request.user
             return obj == request.user  # Application object
 
@@ -115,22 +122,23 @@ class IsApplicantOrAdminUser(permissions.BasePermission):
     def has_permission(self, request, view):
         if not request.user.is_authenticated:
             return False
-        return getattr(request.user, 'role', None) in ['user', 'admin']
+        return getattr(request.user, "role", None) in ["user", "admin"]
 
     def has_object_permission(self, request, view, obj):
-        role = getattr(request.user, 'role', None)
+        role = getattr(request.user, "role", None)
 
         # Admin has complete access
-        if role == 'admin':
+        if role == "admin":
             return True
-        
+
         # Job application ownership
-        if role == 'user':
-            if hasattr(obj, 'user'):
+        if role == "user":
+            if hasattr(obj, "user"):
                 return obj.user == request.user
 
         return False
-    
+
+
 class IsOwnerOrAdmin(permissions.BasePermission):
     """
     - Admin: full access
@@ -143,11 +151,12 @@ class IsOwnerOrAdmin(permissions.BasePermission):
 
     def has_object_permission(self, request, view, obj):
         # Admin can access everything
-        if getattr(request.user, 'role', None) == 'admin':
+        if getattr(request.user, "role", None) == "admin":
             return True
 
         # Only allow users to access their own profile
         return obj.user == request.user
+
 
 class IsParticipantOrAdmin(permissions.BasePermission):
     """
@@ -161,15 +170,15 @@ class IsParticipantOrAdmin(permissions.BasePermission):
 
     def has_object_permission(self, request, view, obj):
         # Admin can access everything
-        if getattr(request.user, 'role', None) == 'admin':
+        if getattr(request.user, "role", None) == "admin":
             return True
 
-        participants = getattr(obj, 'participants', None)
+        participants = getattr(obj, "participants", None)
         if participants is not None:
             return request.user in participants.all()
 
-        conversation = getattr(obj, 'conversation', None)
+        conversation = getattr(obj, "conversation", None)
         if conversation is not None:
             return request.user in conversation.participants.all()
-        
+
         return False

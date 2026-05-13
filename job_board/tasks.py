@@ -1,9 +1,12 @@
-from celery import shared_task
-from django.core.mail import send_mail
-from django.conf import settings
-from .models import Application, Job
-from django.utils import timezone
 from datetime import timedelta
+
+from celery import shared_task
+from django.conf import settings
+from django.core.mail import send_mail
+from django.utils import timezone
+
+from .models import Application, Job
+
 
 @shared_task
 def send_company_registration_confirmation_email(email, name, location, industry):
@@ -25,8 +28,11 @@ def send_company_registration_confirmation_email(email, name, location, industry
 
     return f"Company Registration email sent to {email}"
 
+
 @shared_task
-def send_job_registration_confirmation_email(email, name, title, type, created_at, deadline):
+def send_job_registration_confirmation_email(
+    email, name, title, type, created_at, deadline
+):
     """
     Send job registration email asynchronously.
     """
@@ -42,8 +48,11 @@ def send_job_registration_confirmation_email(email, name, title, type, created_a
 
     return f"Company Job Registration email sent to {email}"
 
+
 @shared_task
-def send_job_application_confirmation_email(email, applicant, title, name, status, applied_at):
+def send_job_application_confirmation_email(
+    email, applicant, title, name, status, applied_at
+):
     """
     Send job submission email asynchronously.
     """
@@ -62,6 +71,7 @@ def send_job_application_confirmation_email(email, applicant, title, name, statu
 
     return f"Job application details sent to {email}"
 
+
 @shared_task
 def deactivate_expired_jobs():
     """Deactivate jobs whose deadline has passed"""
@@ -69,6 +79,7 @@ def deactivate_expired_jobs():
     expired_jobs = Job.objects.filter(deadline__lt=today, is_active=True)
     count = expired_jobs.update(is_active=False)
     return f"Deactivated {count} expired jobs."
+
 
 @shared_task
 def send_application_deadline_reminders():
@@ -79,10 +90,10 @@ def send_application_deadline_reminders():
     applications = Application.objects.filter(
         job__deadline=target_date,
         job__is_active=True,
-        status='pending',
-        is_completed=False
+        status="pending",
+        is_completed=False,
     )
-    
+
     for app in applications:
         subject = "Reminder: 5 Days Left to Apply"
         message = (

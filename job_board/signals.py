@@ -1,7 +1,9 @@
-from django.db.models.signals import post_save, pre_save, post_delete
-from django.dispatch import receiver
 from django.db.models import Q
-from .models import Message, Notification, Profile, User, MessageHistory
+from django.db.models.signals import post_delete, post_save, pre_save
+from django.dispatch import receiver
+
+from .models import Message, MessageHistory, Notification, Profile, User
+
 
 @receiver(post_save, sender=Message)
 def create_message_notification(sender, instance, created, **kwargs):
@@ -11,15 +13,18 @@ def create_message_notification(sender, instance, created, **kwargs):
 
         if not message_receiver:
             conversation = instance.conversation
-            message_receiver = conversation.participants.exclude(user_id=message_sender.user_id).first()
+            message_receiver = conversation.participants.exclude(
+                user_id=message_sender.user_id
+            ).first()
 
         if message_receiver and message_receiver != message_sender:
             Notification.objects.create(
                 message=instance,
                 receiver=message_receiver,
-                type='message',
-                notification=f"New message notification from {message_sender.username}"
+                type="message",
+                notification=f"New message notification from {message_sender.username}",
             )
+
 
 @receiver(pre_save, sender=Message)
 def log_message_edit(sender, instance, **kwargs):
@@ -38,15 +43,19 @@ def log_message_edit(sender, instance, **kwargs):
         )
         instance.edited = True
 
+
 @receiver(post_save, sender=User)
 def create_user_profile(sender, instance, created, **kwargs):
     if created:
         Profile.objects.create(user=instance)
 
+
 @receiver(post_delete, sender=User)
 def cleanup_user_related_data(sender, instance, **kwargs):
     message_ids = list(
-        Message.objects.filter(Q(sender=instance) | Q(receiver=instance)).values_list('message_id', flat=True)
+        Message.objects.filter(Q(sender=instance) | Q(receiver=instance)).values_list(
+            "message_id", flat=True
+        )
     )
 
     if message_ids:
